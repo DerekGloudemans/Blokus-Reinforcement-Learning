@@ -186,24 +186,76 @@ class Board:
         self.squares = np.zeros([dimension,dimension])
         self.limit = dimension
         
-    def check_valid_move(self,piece,location):
+    def check_valid_move(self,player,piece,location):
+        
+        pointlist = piece.get_pointlist()
+        #translate pointlist to board coordinates
+        new_list = []
+        for point in pointlist:
+            new_list.append ((point[0]+location[0],point[1]+location[1]))
+            
         #verify that piece falls within board bounds
+        for point in new_list:
+            if point[0] >= self.limit or point[0] < 0 \
+            or point[1] >= self.limit or point[1] < 0:
+                print("Piece falls beyond board limits.")
+                return False
         #verify that all squares occupied by piece are not yet occupied
-        #verify that if a piece has not yet been played, one corner square is occupied by piece
-        #verify that if a piece has been played, diagonal connection
+        for point in new_list:
+            if self.squares[point[0],point[1]] != 0:
+                print("One or more squares already occupied.")
+                return False
+        
+        #verify that move occupies a corner square
+        if np.prod(self.squares - player) != 0: # player hasn't played yet
+            if (0,0) not in new_list and (0,self.limit-1) not in new_list \
+            and (self.limit-1,0) not in new_list and (self.limit-1,self.limit-1) not in new_list:
+                print("First move must occupy a corner square.")
+                return False
+        
+        #verify that piece is diagonal from another piece of the player
+        else:
+            piece_diags = piece.get_diag_adjacents()
+            diag = False
+            for item in piece_diags:
+                #checks for square outside of board limits, ignore these
+                if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
+                and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
+                    # checks for a diagonal that is occupied by player
+                    if self.squares[item[0]+location[0],item[1]+location[1]] == player: 
+                        diag = True
+                        break # possibly bad form
+            if not diag:
+                print("Piece must be diagonal from a previously played piece.")
+                return False
+        
         #verify that there are no adjacencies
+        piece_adjs = piece.get_adjacents()
+        for item in piece_adjs:
+            #checks for square outside board limits, ignore these
+            if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
+            and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
+                #checks for an adjacent occupied by player
+                if self.squares[item[0] ,item[1]] == player:
+                    print("Piece may not be adjacent to a previously played piece.")
+                    return False
         return True
 
     #location must be a 2D tuple
     def make_move(self,player,piece,location):
-        if self.check_valid_move(piece,location):
+        if self.check_valid_move(player,piece,location):
         
             occupied_points = piece.get_pointlist()
             for point in occupied_points:
                 self.squares[point[0]+location[0],point[1]+location[1]] = player
-            
+            print(self.squares)
             return 1
         else:
+            x = copy.deepcopy(self.squares)
+            occupied_points = piece.get_pointlist()
+            for point in occupied_points:
+                x[point[0]+location[0],point[1]+location[1]] = 8
+            print(x)
             print("Invalid move.")
             return 0
 
