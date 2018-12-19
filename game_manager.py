@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import copy
 # Blokus Game Manager
 # Create a playable representation of the game Blokus with necessary functions 
 # for human and AI players to interact with the game
@@ -21,12 +22,30 @@ class Piecelist:
             if len(piece.coords) <= size_limit:
                 new_piece = Piece(size_limit,piece.get_pointlist())
                 self.pieces.append(new_piece)
-
+    
+    # displays all pieces in a heretofore unknown yet incredibly convenient format
+    def display_all(self):
+        for i in range(0,len(self.pieces)):
+            print('\nPiece {}:'.format(i))
+            self.pieces[i].show()
+    
+    # removes the "piece_num"th piece from the list
+    def remove_piece(self,piece_num):
+        del self.pieces[piece_num]
+    
+    # returns a list of lists, where each list corresponds to all unique 
+    # (non-translational) orientations of a piece, each represented as a piece
+    def all_orientations(self):
+        all_orientations = []
+        for piece in self.pieces:
+            piece_orientations = piece.get_orientations()
+            all_orientations.append(piece_orientations)
+        return all_orientations
 
 ############################### Piece Object ##################################
 # attributes - self.coords- represents a piece as a numpy array
 class Piece:
-    # point_list - a list of x,y tuples
+    # point_list - a list of 2D tuples
     # size_limit - largest size for a piece in a game
     def __init__(self, size_limit, point_list):
         self.coords = np.zeros([size_limit, size_limit])
@@ -86,6 +105,28 @@ class Piece:
       
         return final_list
     
+    # returns a list of all unique orientations of the piece
+    def get_orientations(self):
+        #create list of all possible orientations
+        all_orientations = []
+        flipped = copy.deepcopy(self)
+        flipped.flip()
+        for i in range (0,4):
+            all_orientations.append(copy.deepcopy(self.rotate(i)))
+            all_orientations.append(copy.deepcopy(flipped.rotate(i)))
+        
+        #check for duplicates
+        unique_orientations = []
+        for item in all_orientations:
+            unique = True
+            for item2 in unique_orientations:
+                if item.is_translation(item2):
+                    unique = False
+            if unique:
+                unique_orientations.append(item)
+        
+        return unique_orientations 
+            
     # returns a list of 2D tuple points representing the piece
     def get_pointlist(self):
         point_list = []
@@ -144,6 +185,3 @@ class Piece:
 # Game Object
 # manages the board, players, and turns, and returns final score of game at the end of the game
 
-piece1 = Piece(4,list1)
-piece2 = Piece(4,list2)
-piece3 = Piece(4,testlist)
