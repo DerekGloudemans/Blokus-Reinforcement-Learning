@@ -5,43 +5,6 @@ import copy
 # Create a playable representation of the game Blokus with necessary functions 
 # for human and AI players to interact with the game
 
-############################# Piecelist Object ################################
-# upon initialization, fills with all valid pieces of limit size or less
-# for now, it is implemented manaully with support for size up to 5
-# A list of lists, where each list represents all possible orientations for a single piece
-class Piecelist:
-    def __init__ (self, size_limit):
-        # loads pieces from pickled file 
-        f = open('blokus_pieces_lim_5.pkl', 'rb')
-        all_pieces = pickle.load(f)
-        f.close()
-        
-        # selects all below size limit and resizes to size limit
-        self.pieces = []
-        for piece in all_pieces:
-            if len(piece.coords) <= size_limit:
-                new_piece = Piece(size_limit,piece.get_pointlist())
-                self.pieces.append(new_piece)
-    
-    # displays all pieces in a heretofore unknown yet incredibly convenient format
-    def display_all(self):
-        for i in range(0,len(self.pieces)):
-            print('\nPiece {}:'.format(i))
-            self.pieces[i].show()
-    
-    # removes the "piece_num"th piece from the list
-    def remove_piece(self,piece_num):
-        del self.pieces[piece_num]
-    
-    # returns a list of lists, where each list corresponds to all unique 
-    # (non-translational) orientations of a piece, each represented as a piece
-    def all_orientations(self):
-        all_orientations = []
-        for piece in self.pieces:
-            piece_orientations = piece.get_orientations()
-            all_orientations.append(piece_orientations)
-        return all_orientations
-
 ############################### Piece Object ##################################
 # attributes - self.coords- represents a piece as a numpy array
 class Piece:
@@ -176,11 +139,73 @@ class Piece:
         print(self.coords)
 
 
+############################# Piecelist Object ################################
+# upon initialization, fills with all valid pieces of limit size or less
+# for now, it is implemented manaully with support for size up to 5
+# A list of lists, where each list represents all possible orientations for a single piece
+class Piecelist:
+    def __init__ (self, size_limit):
+        # loads pieces from pickled file 
+        f = open('blokus_pieces_lim_5.pkl', 'rb')
+        all_pieces = pickle.load(f)
+        f.close()
+        
+        # selects all below size limit and resizes to size limit
+        self.pieces = []
+        for piece in all_pieces:
+            if len(piece.coords) <= size_limit:
+                new_piece = Piece(size_limit,piece.get_pointlist())
+                self.pieces.append(new_piece)
     
-# Board Object
+    # displays all pieces in a heretofore unknown yet incredibly convenient format
+    def display_all(self):
+        for i in range(0,len(self.pieces)):
+            print('\nPiece {}:'.format(i))
+            self.pieces[i].show()
+    
+    # removes the "piece_num"th piece from the list
+    def remove_piece(self,piece_num):
+        del self.pieces[piece_num]
+    
+    # returns a list of lists, where each list corresponds to all unique 
+    # (non-translational) orientations of a piece, each represented as a piece
+    def all_orientations(self):
+        all_orientations = []
+        for piece in self.pieces:
+            piece_orientations = piece.get_orientations()
+            all_orientations.append(piece_orientations)
+        return all_orientations
+ 
+    
+############################### Board Object ##################################
 # represents the game and all played pieces; fully describes the state as seen by players
 # possibly also contains the piecelists for the 4 players
 # implements logicl behind valid moves
+class Board:
+    def __init__(self,dimension):
+        self.squares = np.zeros([dimension,dimension])
+        self.limit = dimension
+        
+    def check_valid_move(self,piece,location):
+        #verify that piece falls within board bounds
+        #verify that all squares occupied by piece are not yet occupied
+        #verify that if a piece has not yet been played, one corner square is occupied by piece
+        #verify that if a piece has been played, diagonal connection
+        #verify that there are no adjacencies
+        return True
+
+    #location must be a 2D tuple
+    def make_move(self,player,piece,location):
+        if self.check_valid_move(piece,location):
+        
+            occupied_points = piece.get_pointlist()
+            for point in occupied_points:
+                self.squares[point[0]+location[0],point[1]+location[1]] = player
+            
+            return 1
+        else:
+            print("Invalid move.")
+            return 0
 
 # Game Object
 # manages the board, players, and turns, and returns final score of game at the end of the game
