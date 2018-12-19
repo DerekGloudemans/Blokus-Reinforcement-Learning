@@ -186,12 +186,32 @@ class Piecelist:
 ############################### Board Object ##################################
 # represents the game and all played pieces; fully describes the state as seen by players
 # possibly also contains the piecelists for the 4 players
-# implements logicl behind valid moves
-class Board:
-    def __init__(self,dimension):
-        self.squares = np.zeros([dimension,dimension])
-        self.limit = dimension
-        
+# Game Object
+# manages the board, players, and turns, and returns final score of game at the end of the game
+class Game:
+    def __init__ (self, num_players, dimension, size_limit):
+        self.limit = size_limit
+        self.board = np.zeros([dimension,dimension])
+        self.players = num_players
+        self.turn = 0
+        self.tilesets = []
+        for i in range(0,num_players):
+            self.tilesets.append(Piecelist(size_limit))
+    
+    def get_valid_moves(self,player):
+        all_piece_orientations = self.tilesets[player].all_orientations()
+        valid_moves = []
+        # for each piece in player's tileset
+        for piece_list in all_piece_orientations:
+            #for each unique orientation
+            for item in piece_list:
+                # for each valid tile placement
+                for i in range (-self.limit,len(self.board)+self.limit):
+                    for j in range (-self.limit,len(self.board)+self.limit):
+                        if self.check_valid_move(player,item,(i,j)):
+                            valid_moves.append([item, (i,j)])
+        return valid_moves
+    
     def check_valid_move(self,player,piece,location, verbose=False):
         
         pointlist = piece.get_pointlist()
@@ -208,12 +228,12 @@ class Board:
                 return False
         #verify that all squares occupied by piece are not yet occupied
         for point in new_list:
-            if self.squares[point[0],point[1]] != 0:
+            if self.board[point[0],point[1]] != 0:
                 if verbose: print("One or more squares already occupied.")
                 return False
         
         #verify that move occupies a corner square
-        if np.prod(self.squares - player) != 0: # player hasn't played yet
+        if np.prod(self.board - player) != 0: # player hasn't played yet
             if (0,0) not in new_list and (0,self.limit-1) not in new_list \
             and (self.limit-1,0) not in new_list and (self.limit-1,self.limit-1) not in new_list:
                 if verbose: print("First move must occupy a corner square.")
@@ -228,7 +248,7 @@ class Board:
                 if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
                 and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
                     # checks for a diagonal that is occupied by player
-                    if self.squares[item[0]+location[0],item[1]+location[1]] == player: 
+                    if self.board[item[0]+location[0],item[1]+location[1]] == player: 
                         diag = True
                         break # possibly bad form
             if not diag:
@@ -242,7 +262,7 @@ class Board:
             if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
             and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
                 #checks for an adjacent occupied by player
-                if self.squares[item[0] ,item[1]] == player:
+                if self.board[item[0] ,item[1]] == player:
                     if verbose: print("Piece may not be adjacent to a previously played piece.")
                     return False
         return True
@@ -253,54 +273,26 @@ class Board:
         
             occupied_points = piece.get_pointlist()
             for point in occupied_points:
-                self.squares[point[0]+location[0],point[1]+location[1]] = player
-            print(self.squares)
+                self.board[point[0]+location[0],point[1]+location[1]] = player
+            print(self.board)
             return 1
         else:
-            x = copy.deepcopy(self.squares)
+            x = copy.deepcopy(self.board)
             occupied_points = piece.get_pointlist()
             for point in occupied_points:
                 x[point[0]+location[0],point[1]+location[1]] = 8
             print(x)
             print("Invalid move.")
             return 0
-        
-    def visualizer(self):
-        plt.figure()
-        sns.set(style="white")
-        sns.heatmap(self.squares,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
-        plt.show()
-
-# Game Object
-# manages the board, players, and turns, and returns final score of game at the end of the game
-class Game:
-    def __init__ (self, num_players, dimension, size_limit):
-        self.size_limit = size_limit
-        self.board = Board(dimension)
-        self.players = num_players
-        self.turn = 0
-        self.tilesets = []
-        for i in range(0,num_players):
-            self.tilesets.append(Piecelist(size_limit))
-        
-
+     
     def score(self):
         scores = []
         for i in range(0,self.players):
-            scores.append(np.sum(self.board.squares == i+1).sum())    
+            scores.append(np.sum(self.board == i+1).sum())    
         return scores
-    #def get_player_move()            
     
-    def get_valid_moves(self,player):
-        all_piece_orientations = self.tilesets[player].all_orientations()
-        valid_moves = []
-        # for each piece in player's tileset
-        for piece_list in all_piece_orientations:
-            #for each unique orientation
-            for item in piece_list:
-                # for each valid tile placement
-                for i in range (-self.size_limit,len(self.board.squares)+self.size_limit):
-                    for j in range (-self.size_limit,len(self.board.squares)+self.size_limit):
-                        if self.board.check_valid_move(player,item,(i,j)):
-                            valid_moves.append([item, (i,j)])
-        return valid_moves
+    def visualizer(self):
+        plt.figure()
+        sns.set(style="white")
+        sns.heatmap(self.board,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
+        plt.show()
