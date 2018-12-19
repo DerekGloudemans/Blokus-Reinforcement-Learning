@@ -1,5 +1,5 @@
 import numpy as np
-import Pickle as pickle
+import pickle
 # Blokus Game Manager
 # Create a playable representation of the game Blokus with necessary functions 
 # for human and AI players to interact with the game
@@ -10,8 +10,18 @@ import Pickle as pickle
 # A list of lists, where each list represents all possible orientations for a single piece
 class Piecelist:
     def __init__ (self, size_limit):
+        # loads pieces from pickled file 
         f = open('blokus_pieces_lim_5.pkl', 'rb')
-        new = pickle.load(f)
+        all_pieces = pickle.load(f)
+        f.close()
+        
+        # selects all below size limit and resizes to size limit
+        self.pieces = []
+        for piece in all_pieces:
+            if len(piece.coords) <= size_limit:
+                new_piece = Piece(size_limit,piece.get_pointlist())
+                self.pieces.append(new_piece)
+
 
 ############################### Piece Object ##################################
 # attributes - self.coords- represents a piece as a numpy array
