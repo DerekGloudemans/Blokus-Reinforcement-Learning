@@ -1,6 +1,12 @@
 import numpy as np
 import pickle
 import copy
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+#%matplotlib in command line
+#%matplotlib inline
+
 # Blokus Game Manager
 # Create a playable representation of the game Blokus with necessary functions 
 # for human and AI players to interact with the game
@@ -186,7 +192,7 @@ class Board:
         self.squares = np.zeros([dimension,dimension])
         self.limit = dimension
         
-    def check_valid_move(self,player,piece,location):
+    def check_valid_move(self,player,piece,location, verbose=False):
         
         pointlist = piece.get_pointlist()
         #translate pointlist to board coordinates
@@ -198,19 +204,19 @@ class Board:
         for point in new_list:
             if point[0] >= self.limit or point[0] < 0 \
             or point[1] >= self.limit or point[1] < 0:
-                print("Piece falls beyond board limits.")
+                if verbose: print("Piece falls beyond board limits.")
                 return False
         #verify that all squares occupied by piece are not yet occupied
         for point in new_list:
             if self.squares[point[0],point[1]] != 0:
-                print("One or more squares already occupied.")
+                if verbose: print("One or more squares already occupied.")
                 return False
         
         #verify that move occupies a corner square
         if np.prod(self.squares - player) != 0: # player hasn't played yet
             if (0,0) not in new_list and (0,self.limit-1) not in new_list \
             and (self.limit-1,0) not in new_list and (self.limit-1,self.limit-1) not in new_list:
-                print("First move must occupy a corner square.")
+                if verbose: print("First move must occupy a corner square.")
                 return False
         
         #verify that piece is diagonal from another piece of the player
@@ -226,7 +232,7 @@ class Board:
                         diag = True
                         break # possibly bad form
             if not diag:
-                print("Piece must be diagonal from a previously played piece.")
+                if verbose: print("Piece must be diagonal from a previously played piece.")
                 return False
         
         #verify that there are no adjacencies
@@ -237,7 +243,7 @@ class Board:
             and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
                 #checks for an adjacent occupied by player
                 if self.squares[item[0] ,item[1]] == player:
-                    print("Piece may not be adjacent to a previously played piece.")
+                    if verbose: print("Piece may not be adjacent to a previously played piece.")
                     return False
         return True
 
@@ -258,7 +264,43 @@ class Board:
             print(x)
             print("Invalid move.")
             return 0
+        
+    def visualizer(self):
+        plt.figure()
+        sns.set(style="white")
+        sns.heatmap(self.squares,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
+        plt.show()
 
 # Game Object
 # manages the board, players, and turns, and returns final score of game at the end of the game
+class Game:
+    def __init__ (self, num_players, dimension, size_limit):
+        self.size_limit = size_limit
+        self.board = Board(dimension)
+        self.players = num_players
+        self.turn = 0
+        self.tilesets = []
+        for i in range(0,num_players):
+            self.tilesets.append(Piecelist(size_limit))
+        
 
+    def score(self):
+        scores = []
+        for i in range(0,self.players):
+            scores.append(np.sum(self.board.squares == i+1).sum())    
+        return scores
+    #def get_player_move()            
+    
+    def get_valid_moves(self,player):
+        all_piece_orientations = self.tilesets[player].all_orientations()
+        valid_moves = []
+        # for each piece in player's tileset
+        for piece_list in all_piece_orientations:
+            #for each unique orientation
+            for item in piece_list:
+                # for each valid tile placement
+                for i in range (-self.size_limit,len(self.board.squares)+self.size_limit):
+                    for j in range (-self.size_limit,len(self.board.squares)+self.size_limit):
+                        if self.board.check_valid_move(player,item,(i,j)):
+                            valid_moves.append([item, (i,j)])
+        return valid_moves
