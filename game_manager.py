@@ -77,19 +77,19 @@ class Piece:
     # returns a list of all unique orientations of the piece
     def get_orientations(self):
         #create list of all possible orientations
-        all_orientations = []
+        orientations = []
         flipped = copy.deepcopy(self)
         flipped.flip()
         for i in range (0,4):
-            all_orientations.append(copy.deepcopy(self.rotate(i)))
-            all_orientations.append(copy.deepcopy(flipped.rotate(i)))
+            orientations.append((copy.deepcopy(self.rotate(i)),False,i))
+            orientations.append((copy.deepcopy(flipped.rotate(i)),True,i))
         
         #check for duplicates
         unique_orientations = []
-        for item in all_orientations:
+        for item in orientations:
             unique = True
             for item2 in unique_orientations:
-                if item.is_translation(item2):
+                if item[0].is_translation(item2[0]):
                     unique = False
             if unique:
                 unique_orientations.append(item)
@@ -176,11 +176,11 @@ class Piecelist:
     # returns a list of lists, where each list corresponds to all unique 
     # (non-translational) orientations of a piece, each represented as a piece
     def all_orientations(self):
-        all_orientations = []
+        orientations = []
         for piece in self.pieces:
             piece_orientations = piece.get_orientations()
-            all_orientations.append(piece_orientations)
-        return all_orientations
+            orientations.append(piece_orientations)
+        return orientations
  
     
 ############################### Board Object ##################################
@@ -195,7 +195,7 @@ class Game:
         self.players = num_players
         self.turn = 0
         self.tilesets = []
-        for i in range(0,num_players):
+        for i in range(0,num_players+1):
             self.tilesets.append(Piecelist(size_limit))
     
     def get_valid_moves(self,player):
@@ -208,8 +208,8 @@ class Game:
                 # for each valid tile placement
                 for i in range (-self.limit,len(self.board)+self.limit):
                     for j in range (-self.limit,len(self.board)+self.limit):
-                        if self.check_valid_move(player,item,(i,j)):
-                            valid_moves.append([item, (i,j)])
+                        if self.check_valid_move(player,item[0],(i,j)):
+                            valid_moves.append([item[0], (i,j)])
         return valid_moves
     
     def check_valid_move(self,player,piece,location, verbose=False):
@@ -268,30 +268,48 @@ class Game:
         return True
 
     #location must be a 2D tuple
-    def make_move(self,player,piece,location):
-        if self.check_valid_move(player,piece,location):
+    def make_move(self,player,piece_num,flip,rotations,location):
+        #get piece, rotate and flip according to 
+        piece = self.tilesets[player].pieces[piece_num]
+        if flip:
+            piece = piece.flip()
+        piece = piece.rotate(rotations)
         
+        #verify move is valid
+        if self.check_valid_move(player,piece,location):
+            
+            # update squares on board with new piece
             occupied_points = piece.get_pointlist()
             for point in occupied_points:
                 self.board[point[0]+location[0],point[1]+location[1]] = player
             print(self.board)
+            
+            #remove piece from player's piecelist
+            self.tilesets[player].remove_piece(piece_num)
+            
             return 1
+        
+        #if move invalid, show attempted move but do not change board
         else:
             x = copy.deepcopy(self.board)
             occupied_points = piece.get_pointlist()
+            #should check for within bounds
             for point in occupied_points:
                 x[point[0]+location[0],point[1]+location[1]] = 8
             print(x)
             print("Invalid move.")
             return 0
-     
+    
+    #queries player for move (returns piece number from piecelist, location)
+    #def ask_move():
+    
     def score(self):
         scores = []
-        for i in range(0,self.players):
-            scores.append(np.sum(self.board == i+1).sum())    
+        for i in range(0,self.players+1):
+            scores.append(np.sum(self.board == i).sum())    
         return scores
     
-    def visualizer(self):
+    def visualize(self):
         plt.figure()
         sns.set(style="white")
         sns.heatmap(self.board,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
