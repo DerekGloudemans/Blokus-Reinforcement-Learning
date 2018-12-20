@@ -190,7 +190,8 @@ class Piecelist:
 # manages the board, players, and turns, and returns final score of game at the end of the game
 class Game:
     def __init__ (self, num_players, dimension, size_limit):
-        self.limit = size_limit
+        self.board_limit = dimension
+        self.piece_limit = size_limit
         self.board = np.zeros([dimension,dimension])
         self.players = num_players
         self.turn = 0
@@ -206,13 +207,13 @@ class Game:
             #for each unique orientation
             for item in piece_list:
                 # for each valid tile placement
-                for i in range (-self.limit,len(self.board)+self.limit):
-                    for j in range (-self.limit,len(self.board)+self.limit):
+                for i in range (-self.board_limit,len(self.board)+self.board_limit):
+                    for j in range (-self.board_limit,len(self.board)+self.board_limit):
                         if self.check_valid_move(player,item[0],(i,j)):
                             valid_moves.append([item[0], (i,j)])
         return valid_moves
     
-    def check_valid_move(self,player,piece,location, verbose=False):
+    def check_valid_move(self,player,piece,location, verbose=True):
         
         pointlist = piece.get_pointlist()
         #translate pointlist to board coordinates
@@ -222,9 +223,9 @@ class Game:
             
         #verify that piece falls within board bounds
         for point in new_list:
-            if point[0] >= self.limit or point[0] < 0 \
-            or point[1] >= self.limit or point[1] < 0:
-                if verbose: print("Piece falls beyond board limits.")
+            if point[0] >= self.board_limit or point[0] < 0 \
+            or point[1] >= self.board_limit or point[1] < 0:
+                if verbose: print("Piece falls beyond board limits. {} {} {}".format(point[0],point[1],self.board_limit))
                 return False
         #verify that all squares occupied by piece are not yet occupied
         for point in new_list:
@@ -234,8 +235,8 @@ class Game:
         
         #verify that move occupies a corner square
         if np.prod(self.board - player) != 0: # player hasn't played yet
-            if (0,0) not in new_list and (0,self.limit-1) not in new_list \
-            and (self.limit-1,0) not in new_list and (self.limit-1,self.limit-1) not in new_list:
+            if (0,0) not in new_list and (0,self.board_limit-1) not in new_list \
+            and (self.board_limit-1,0) not in new_list and (self.board_limit-1,self.board_limit-1) not in new_list:
                 if verbose: print("First move must occupy a corner square.")
                 return False
         
@@ -245,11 +246,12 @@ class Game:
             diag = False
             for item in piece_diags:
                 #checks for square outside of board limits, ignore these
-                if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
-                and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
+                if item[0]+location[0] >= 0 and item[0]+location[0] < self.board_limit \
+                and item[1]+location[1] >= 0 and item[1]+location[1] < self.board_limit:
                     # checks for a diagonal that is occupied by player
                     if self.board[item[0]+location[0],item[1]+location[1]] == player: 
                         diag = True
+                        print('Diagonal Square - {} {}'.format(item[0] + location[0],item[1] + location[1]))
                         break # possibly bad form
             if not diag:
                 if verbose: print("Piece must be diagonal from a previously played piece.")
@@ -259,10 +261,10 @@ class Game:
         piece_adjs = piece.get_adjacents()
         for item in piece_adjs:
             #checks for square outside board limits, ignore these
-            if item[0]+location[0] >= 0 and item[0]+location[0] < self.limit \
-            and item[1]+location[0] >= 0 and item[1]+location[1] < self.limit:
+            if item[0]+location[0] >= 0 and item[0]+location[0] < self.board_limit \
+            and item[1]+location[1] >= 0 and item[1]+location[1] < self.board_limit:
                 #checks for an adjacent occupied by player
-                if self.board[item[0] ,item[1]] == player:
+                if self.board[item[0]+location[0] ,item[1]+location[1]] == player:
                     if verbose: print("Piece may not be adjacent to a previously played piece.")
                     return False
         return True
@@ -272,8 +274,8 @@ class Game:
         #get piece, rotate and flip according to 
         piece = self.tilesets[player].pieces[piece_num]
         if flip:
-            piece = piece.flip()
-        piece = piece.rotate(rotations)
+            piece = copy.deepcopy(piece).flip()
+        piece = copy.deepcopy(piece).rotate(rotations)
         
         #verify move is valid
         if self.check_valid_move(player,piece,location):
