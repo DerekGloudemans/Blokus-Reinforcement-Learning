@@ -4,7 +4,6 @@ import copy
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import pynput.keyboard
 #%matplotlib in command line
 #%matplotlib inline
 
@@ -198,6 +197,8 @@ class Game:
         self.tilesets = []
         for i in range(0,num_players+1):
             self.tilesets.append(Piecelist(size_limit))
+        plt.figure()
+        self.visualize()
     
     def get_valid_moves(self,player):
         all_piece_orientations = self.tilesets[player].all_orientations()
@@ -288,7 +289,7 @@ class Game:
             
             #remove piece from player's piecelist
             self.tilesets[player].remove_piece(piece_num)
-            
+            self.visualize()
             return 1
         
         #if move invalid, show attempted move but do not change board
@@ -303,13 +304,13 @@ class Game:
             return 0
     
     #queries player for move (returns piece number from piecelist, location)
-    def ask_move(self,player_type):
-        if player_type == 'ai':
-            print ('Error')
-        if player_type == 'rand':
-            print (1)
-        else: #player type is human
-            #implement playing interface here
+#    def ask_move(self,player_type):
+#        if player_type == 'ai':
+#            print ('Error')
+#        if player_type == 'rand':
+#            print (1)
+#        else: #player type is human
+#            #implement playing interface here
         
     def score(self):
         scores = []
@@ -318,7 +319,7 @@ class Game:
         return scores
     
     def visualize(self):
-        plt.figure()
+        
         sns.set(style="white")
         sns.heatmap(self.board,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
         plt.show()
