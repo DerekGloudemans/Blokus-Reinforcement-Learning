@@ -4,6 +4,7 @@ import copy
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import pynput.keyboard
 #%matplotlib in command line
 #%matplotlib inline
 
@@ -183,11 +184,10 @@ class Piecelist:
         return orientations
  
     
-############################### Board Object ##################################
-# represents the game and all played pieces; fully describes the state as seen by players
-# possibly also contains the piecelists for the 4 players
-# Game Object
-# manages the board, players, and turns, and returns final score of game at the end of the game
+############################### Game Object ##################################
+# represents the game and all played pieces
+# Contains the piecelists for the 4 players
+# Keeps track of turn
 class Game:
     def __init__ (self, num_players, dimension, size_limit):
         self.board_limit = dimension
@@ -303,8 +303,14 @@ class Game:
             return 0
     
     #queries player for move (returns piece number from piecelist, location)
-    #def ask_move():
-    
+    def ask_move(self,player_type):
+        if player_type == 'ai':
+            print ('Error')
+        if player_type == 'rand':
+            print (1)
+        else: #player type is human
+            #implement playing interface here
+        
     def score(self):
         scores = []
         for i in range(0,self.players+1):
