@@ -193,12 +193,12 @@ class Game:
         self.piece_limit = size_limit
         self.board = np.zeros([dimension,dimension])
         self.players = num_players
-        self.turn = 0
+        self.turn = 1
         self.tilesets = []
         for i in range(0,num_players+1):
             self.tilesets.append(Piecelist(size_limit))
         plt.figure()
-        self.visualize()
+        #self.visualize()
     
     def get_valid_moves(self,player):
         all_piece_orientations = self.tilesets[player].all_orientations()
@@ -290,27 +290,94 @@ class Game:
             #remove piece from player's piecelist
             self.tilesets[player].remove_piece(piece_num)
             self.visualize()
-            return 1
+            return True
         
         #if move invalid, show attempted move but do not change board
         else:
-            x = copy.deepcopy(self.board)
-            occupied_points = piece.get_pointlist()
-            #should check for within bounds
-            for point in occupied_points:
-                x[point[0]+location[0],point[1]+location[1]] = 8
-            print(x)
+#            x = copy.deepcopy(self.board)
+#            occupied_points = piece.get_pointlist()
+#            #should check for within bounds
+#            for point in occupied_points:
+#                x[point[0]+location[0],point[1]+location[1]] = 8
+#            print(x)
             print("Invalid move.")
-            return 0
+            return False
     
     #queries player for move (returns piece number from piecelist, location)
-#    def ask_move(self,player_type):
-#        if player_type == 'ai':
-#            print ('Error')
-#        if player_type == 'rand':
-#            print (1)
-#        else: #player type is human
-#            #implement playing interface here
+    def ask_move(self,player_type):
+        
+        player = self.turn
+        
+        if player_type == 'ai':
+            print ('Error')
+        if player_type == 'rand':
+            print ('Error')
+        
+        else: #human player
+            
+            #variables to keep track of piece manipulation
+            location1 = int(self.board_limit/2)
+            location2 = int(self.board_limit/2)
+            flip = False
+            piece_num = 0
+            rotations = 0
+            
+            played = False
+            plt.figure()
+            while not played: #move is invalid
+                   
+                #get current piece and position
+                temp = copy.deepcopy(self.board)
+                if flip:
+                    cur_piece = copy.deepcopy(self.tilesets[player].pieces[piece_num]).rotate(rotations).flip()
+                else:
+                    cur_piece = copy.deepcopy(self.tilesets[player].pieces[piece_num]).rotate(rotations)
+                occupied_points = cur_piece.get_pointlist()
+                
+                #display current modified board
+                for item in occupied_points:
+                    #checks for square outside of board limits, ignore these
+                    if item[0]+location1 >= 0 and item[0]+location1 < self.board_limit \
+                    and item[1]+location2 >= 0 and item[1]+location2 < self.board_limit:
+                        temp[item[0]+location1,item[1]+location2] = player
+                
+                sns.set(style="white")
+                sns.heatmap(temp,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
+                plt.show()       
+                
+                key = input('Press a key to maneuver piece.')
+                if key == 'a':
+                    #move piece left
+                    location2 = location2 - 1
+                elif key == 's':
+                    #move piece down
+                    location1 = location1 + 1
+                elif key == 'd':
+                    #move piece right
+                    location2 = location2 + 1
+                elif key == 'w':
+                    #move piece up:
+                    location1 = location1 - 1
+                elif key == 'r':
+                    #rotate piece 90 degrees
+                    rotations = (rotations +1) % 4
+                elif key == 'f':
+                    #flip piece
+                    flip = not flip
+                elif key == 'p':
+                    #attempt to play piece
+                    played = self.make_move(player,piece_num,flip,rotations,(location1,location2))
+                elif key == 'm':
+                    piece_num = (piece_num + 1) % len(self.tilesets[player].pieces)
+                elif key == 'n':
+                    piece_num = (piece_num - 1) % len(self.tilesets[player].pieces)
+                else:
+                    print('Not a valid key. Valid keys are a,s,d,w,f,r,p,n,m')
+        
+                
+        
+        
+        
         
     def score(self):
         scores = []
