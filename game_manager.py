@@ -2,8 +2,8 @@ import numpy as np
 import pickle
 import copy
 import matplotlib.pyplot as plt
-import pandas as pd
 import seaborn as sns
+import time
 #%matplotlib in command line
 #%matplotlib inline
 
@@ -198,7 +198,7 @@ class Game:
         for i in range(0,num_players+1):
             self.tilesets.append(Piecelist(size_limit))
         plt.figure()
-        #self.visualize()
+        self.visualize()
     
     def get_valid_moves(self,player):
         all_piece_orientations = self.tilesets[player].all_orientations()
@@ -208,13 +208,13 @@ class Game:
             #for each unique orientation
             for item in piece_list:
                 # for each valid tile placement
-                for i in range (-self.board_limit,len(self.board)+self.board_limit):
-                    for j in range (-self.board_limit,len(self.board)+self.board_limit):
+                for i in range (-self.piece_limit,len(self.board)+self.piece_limit):
+                    for j in range (-self.piece_limit,len(self.board)+self.piece_limit):
                         if self.check_valid_move(player,item[0],(i,j)):
                             valid_moves.append([item[0], (i,j)])
         return valid_moves
     
-    def check_valid_move(self,player,piece,location, verbose=True):
+    def check_valid_move(self,player,piece,location, verbose=False):
         
         pointlist = piece.get_pointlist()
         #translate pointlist to board coordinates
@@ -252,7 +252,7 @@ class Game:
                     # checks for a diagonal that is occupied by player
                     if self.board[item[0]+location[0],item[1]+location[1]] == player: 
                         diag = True
-                        print('Diagonal Square - {} {}'.format(item[0] + location[0],item[1] + location[1]))
+                        if verbose: print('Diagonal Square - {} {}'.format(item[0] + location[0],item[1] + location[1]))
                         break # possibly bad form
             if not diag:
                 if verbose: print("Piece must be diagonal from a previously played piece.")
@@ -285,7 +285,6 @@ class Game:
             occupied_points = piece.get_pointlist()
             for point in occupied_points:
                 self.board[point[0]+location[0],point[1]+location[1]] = player
-            print(self.board)
             
             #remove piece from player's piecelist
             self.tilesets[player].remove_piece(piece_num)
@@ -316,20 +315,19 @@ class Game:
         else: #human player
             
             #variables to keep track of piece manipulation
-            location1 = int(self.board_limit/2)
-            location2 = int(self.board_limit/2)
+            location1 = int(self.board_limit/2.0)
+            location2 = int(self.board_limit/2.0)
             flip = False
             piece_num = 0
             rotations = 0
             
             played = False
-            plt.figure()
             while not played: #move is invalid
                    
                 #get current piece and position
                 temp = copy.deepcopy(self.board)
                 if flip:
-                    cur_piece = copy.deepcopy(self.tilesets[player].pieces[piece_num]).rotate(rotations).flip()
+                    cur_piece = copy.deepcopy(self.tilesets[player].pieces[piece_num]).flip().rotate(rotations)
                 else:
                     cur_piece = copy.deepcopy(self.tilesets[player].pieces[piece_num]).rotate(rotations)
                 occupied_points = cur_piece.get_pointlist()
@@ -339,11 +337,11 @@ class Game:
                     #checks for square outside of board limits, ignore these
                     if item[0]+location1 >= 0 and item[0]+location1 < self.board_limit \
                     and item[1]+location2 >= 0 and item[1]+location2 < self.board_limit:
-                        temp[item[0]+location1,item[1]+location2] = player
-                
-                sns.set(style="white")
+                        temp[item[0]+location1,item[1]+location2] = player+5
+
                 sns.heatmap(temp,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
-                plt.show()       
+                plt.show()      
+                time.sleep(1)
                 
                 key = input('Press a key to maneuver piece.')
                 if key == 'a':
@@ -390,3 +388,28 @@ class Game:
         sns.set(style="white")
         sns.heatmap(self.board,cmap = 'Pastel2', vmin = 0, vmax = 4, center = 2 ,linewidths = 0.5,cbar = False,square= True)
         plt.show()
+        
+        
+###################################### Start body code###########################
+num_players = 2
+tile_lim = 5
+board_size = 10
+game = Game(num_players,board_size,tile_lim)
+
+end_count = 0
+while end_count < num_players:
+    #one turn
+    
+    #see if current player has any valid moves
+    if len(game.get_valid_moves(game.turn)) > 0:
+        print('Player {}\'s turn'.format(game.turn))
+        game.ask_move('human')
+        end_count = 0
+    
+    else:
+        end_count = end_count + 1
+           
+    # make next player's turn
+    game.turn = ((game.turn) % num_players) + 1
+    final_scores = game.score()
+print (final_scores)
