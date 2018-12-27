@@ -1,9 +1,6 @@
 import numpy as np
-import pickle
-import copy
-import matplotlib.pyplot as plt
 
-# Implement  Piece as a list of coordinates
+# Implement piece as a list of coordinates
 class Piece:
     
     # Constructor
