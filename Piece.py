@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 # Implement piece as a list of coordinates
 class Piece:
@@ -17,20 +18,17 @@ class Piece:
         self.adjacents = self.get_adjacents()
         self.diag_adjacents = self.get_diag_adjacents()
     
-    #### Utility functions for translating piece
+    #### Utilpieceity functions for translating piece
     
     #flips piece along major diagonal    
     def flip(self):   
-        for point in self.occupied:
-            point = (-point[1],-point[0])
-        for point in self.adjacents:
-            point = (-point[1],-point[0])
-        for point in self.corners:
-            point = (-point[1],-point[0])
-        for point in self.diag_adjacents:
-            point = (-point[1],-point[0])  
-        self.shift_pos()
-   
+         self.occupied[:] = [(-point[1],-point[0]) for point in self.occupied]
+         self.corners[:] = [(-point[1],-point[0]) for point in self.corners]
+         self.adjacents[:] = [(-point[1],-point[0]) for point in self.adjacents]
+         self.diag_adjacents[:] = [(-point[1],-point[0]) for point in self.diag_adjacents]
+         self.shift_pos()
+         return self
+    
      # rotates piece by 90 degrees times input
     def rotate(self,quarter_rotations = 1):
         if quarter_rotations % 4 == 0:
@@ -54,16 +52,13 @@ class Piece:
             xs = 1
             ys = -1
         
-        for point in self.occupied:
-            point = (xs*point[x],ys*point[y])
-        for point in self.adjacents:
-            point = (xs*point[x],ys*point[y])
-        for point in self.corners:
-            point = (xs*point[x],ys*point[y])
-        for point in self.diag_adjacents:
-            point = (xs*point[x],ys*point[y])
+        self.occupied[:] = [(xs*point[x],ys*point[y]) for point in self.occupied]
+        self.corners[:] = [(xs*point[x],ys*point[y]) for point in self.corners]
+        self.adjacents[:] = [(xs*point[x],ys*point[y]) for point in self.adjacents]
+        self.diag_adjacents[:] = [(xs*point[x],ys*point[y]) for point in self.diag_adjacents]
         self.shift_pos()
-   
+        return self
+    
     def shift_pos(self):
         #find min coordinates
         min_x = 0
@@ -75,15 +70,12 @@ class Piece:
                 min_y = point[1]
                 
         #shift so all ocupied points coordinates are positive or 0
-        for point in self.occupied:
-            point = (point[0]-min_x,point[1]-min_y)
-        for point in self.corners:
-            point = (point[0]-min_x,point[1]-min_y)
-        for point in self.diag_adjacents:
-            point = (point[0]-min_x,point[1]-min_y)
-        for point in self.adjacents:
-            point = (point[0]-min_x,point[1]-min_y)
+        self.occupied[:] = [(point[0]-min_x,point[1]-min_y) for point in self.occupied]
+        self.corners[:] = [(point[0]-min_x,point[1]-min_y) for point in self.corners]
+        self.adjacents[:] = [(point[0]-min_x,point[1]-min_y) for point in self.adjacents]
+        self.diag_adjacents[:] = [(point[0]-min_x,point[1]-min_y) for point in self.diag_adjacents]
  
+    
     #### Utility functions for getting specific points (used by constructor)    
     
     # returns a list of 2D tuples for adjacent spaces
@@ -158,7 +150,7 @@ class Piece:
         a = self.piece_array()
         for i in range(0,len(a)):
             for j in range(0,len(a)):
-                if np.array_equal(a, np.roll(other_piece.piece_array,(i,j),(0,1))):
+                if np.array_equal(a, np.roll(other_piece.piece_array(),(i,j),(0,1))):
                     return True
         return False
     
@@ -175,24 +167,24 @@ class Piece:
     def show(self):
         print(self.piece_array())
         
-    #    # returns a list of all unique orientations of the piece
-#    def get_orientations(self):
-#        #create list of all possible orientations
-#        orientations = []
-#        flipped = copy.deepcopy(self)
-#        flipped.flip()
-#        for i in range (0,4):
-#            orientations.append((copy.deepcopy(self.rotate(i)),False,i))
-#            orientations.append((copy.deepcopy(flipped.rotate(i)),True,i))
-#        
-#        #check for duplicates
-#        unique_orientations = []
-#        for item in orientations:
-#            unique = True
-#            for item2 in unique_orientations:
-#                if item[0].is_translation(item2[0]):
-#                    unique = False
-#            if unique:
-#                unique_orientations.append(item)
-#        
-#        return unique_orientations 
+    # returns a list of all unique orientations of the piece
+    def get_orientations(self):
+        #create list of all possible orientations
+        orientations = []
+        flipped = copy.deepcopy(self)
+        flipped.flip()
+        for i in range (0,4):
+            orientations.append((copy.deepcopy(self.rotate(i)),False,i))
+            orientations.append((copy.deepcopy(flipped.rotate(i)),True,i))
+        
+        #check for duplicates
+        unique_orientations = []
+        for item in orientations:
+            unique = True
+            for item2 in unique_orientations:
+                if item[0].is_translation(item2[0]):
+                    unique = False
+            if unique:
+                unique_orientations.append(item)
+        
+        return unique_orientations 
