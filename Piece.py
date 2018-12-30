@@ -26,7 +26,7 @@ class Piece:
          self.corners[:] = [(-point[1],-point[0]) for point in self.corners]
          self.adjacents[:] = [(-point[1],-point[0]) for point in self.adjacents]
          self.diag_adjacents[:] = [(-point[1],-point[0]) for point in self.diag_adjacents]
-         self.shift_pos()
+         self.shift_min()
          return self
     
      # rotates piece by 90 degrees times input
@@ -56,10 +56,19 @@ class Piece:
         self.corners[:] = [(xs*point[x],ys*point[y]) for point in self.corners]
         self.adjacents[:] = [(xs*point[x],ys*point[y]) for point in self.adjacents]
         self.diag_adjacents[:] = [(xs*point[x],ys*point[y]) for point in self.diag_adjacents]
-        self.shift_pos()
+        self.shift_min()
         return self
     
-    def shift_pos(self):
+    # shift is a 2D tuple
+    # warning - not protected against index overflow
+    def translate(self, shift):
+        self.occupied[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.occupied]
+        self.corners[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.corners]
+        self.adjacents[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.adjacents]
+        self.diag_adjacents[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.diag_adjacents]
+        return self
+    
+    def shift_min(self):
         #find min coordinates
         min_x = 0
         min_y = 0
