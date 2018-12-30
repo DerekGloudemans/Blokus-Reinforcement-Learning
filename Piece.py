@@ -1,3 +1,7 @@
+from Board import Board
+from Player import Player
+from Game import Game
+
 import numpy as np
 import copy
 
