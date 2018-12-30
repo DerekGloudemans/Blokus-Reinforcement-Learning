@@ -5,26 +5,17 @@ import pickle
 import numpy as np
 import copy
 
+# a move will be stored as (player,piece_num,orientation,translation)
+
 class Player:
     
     #initialize
-    def __init__(self,player_num,size_in,board_size,board):
+    def __init__(self,player_num,size_in,board_size,board,pieces):
         
         self.num = player_num
-        
-        #loads piece shapes from file
-        f = open('blokus_pieces_lim_5.pkl', 'rb')
-        all_pieces = pickle.load(f)
-        f.close()
-        # selects all below size limit and resizes to size limit
-        self.pieces = []
-        for piece in all_pieces:
-            if piece.size <= size_in:
-                temp = Piece(size_in,piece)
-                self.pieces.append(temp.get_orientations())
        
         # maintains a vector of played pieces (1 = played)
-        self.played = np.zeros([1,len(self.pieces)])
+        self.played = np.zeros([1,len(pieces)])
     
         # keep track of valid corners to play on (initialize to board corner only)
         if player_num == 1:
@@ -40,14 +31,37 @@ class Player:
         self.changes = []
         
         # maintain a list of valid moves
+        self.valid_moves = []
         self.valid_moves = self.get_valid_moves(board)
     
-    def get_valid_moves(self,board):
-        #for each piece and orientation in piecelist
-        #for each corner
-        #match to each valid corner on board, test if valid move
-        return []
-    
+    def get_valid_moves(self,board,pieces):
+        if self.valid_moves == []: #first turn
+        
+            all_valid_moves = []
+            
+            # each i represents 1 piece
+            for i in range (0,len(pieces)):
+                #each j represents 1 orientation
+                for j in range (0,pieces[i]):
+                    #each k represents 1 corner of the piece
+                    for k in range (0, len(pieces[i][j].corners)):
+                        #each m represents one valid corner pplacement  on board for player
+                        for m in range (0, len(self.valid_corners)):
+                            #find translation necessary to put piece corner into valid corner
+                            x = self.valid_corners[m][0] - pieces[i][j].corners[k][0]
+                            y = self.valid_corners[m][1] - pieces[i][j].corners[k][1]
+                            
+                            #check if move is valid
+                            temp = copy.deepcopy(pieces[i][j])
+                            temp.translate(x,y)
+                            if board.check_valid_move(self.num,temp):
+                                all_valid_moves.append((self.num,i,j,(x,y)))
+            return all_valid_moves
+        
+        else: #valid moves list already exists
+            return []
+        
+        
     # update_valid_moves
     # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
     # get_score

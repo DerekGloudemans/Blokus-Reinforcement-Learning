@@ -12,8 +12,9 @@ class Board:
         self.size = size
 
 # moves are expressed as a translated (player,piece_num,orientation,translation (x,y))
-    def check_valid_move(self, player, piece_num,orientation,shift):
+    def check_valid_move(self, player,piece):
         #make copy of piece by querying player's piecelist and translating
+        # will need to access actual player object to get access to piecelist
         test_piece = [] #change later
         
         #verify each corner falls within bounds
@@ -48,7 +49,7 @@ class Board:
         print("Sorry Dude, that function doesn't exist yet.")
         
     # play_piece
-    def play_piece(self,player,piece_num,orientation,shift):
+    def play_piece(self,player,piece):
         #get piece
         piece = []
         for point in piece.occupied:
