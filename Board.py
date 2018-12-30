@@ -1,10 +1,9 @@
 from Piece import Piece
-from Player import Player
-from Game import Game
 import numpy as np
 import copy
 
 # Board class has board and size
+# views moves as a Piece object (already translated) and a player (integer from 1 to 4)
 
 class Board:
     def __init__(self,size):
@@ -12,11 +11,8 @@ class Board:
         self.size = size
 
 # moves are expressed as a translated (player,piece_num,orientation,translation (x,y))
-    def check_valid_move(self, player,piece):
-        #make copy of piece by querying player's piecelist and translating
-        # will need to access actual player object to get access to piecelist
-        test_piece = [] #change later
-        
+    def check_valid_move(self, player,test_piece):                
+       
         #verify each corner falls within bounds
         #verify at least one corner adjacent belongs to player or first move
         corner_adj = False
@@ -45,13 +41,11 @@ class Board:
         print(self.board)
 
     # display fancy
-    def display_fance(self):
+    def display_fancy(self):
         print("Sorry Dude, that function doesn't exist yet.")
         
     # play_piece
     def play_piece(self,player,piece):
-        #get piece
-        piece = []
         for point in piece.occupied:
             self.board[point[0],point[1]] = player
     

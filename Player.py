@@ -1,6 +1,5 @@
 from Piece import Piece
 from Board import Board
-from Game import Game
 import pickle
 import numpy as np
 import copy
