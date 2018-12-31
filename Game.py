@@ -70,8 +70,8 @@ class Game():
     def score(self):
         scores= []
         for i in range(0,len(self.player_list)):
-            scores.append(np.sum(self.board == i+1).sum())    
+            scores.append(np.sum(self.game_board == i+1).sum())    
         return scores
     
-game = Game(5,2,20)
-game.run()
+game = Game(5,4,20)
+final_score = game.run()

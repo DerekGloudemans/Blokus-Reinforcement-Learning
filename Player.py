@@ -150,7 +150,7 @@ class Player:
             return False
         else:
             if strategy == 'random':
-                move_idx = random.randint(0,len(self.valid_moves))
+                move_idx = random.randint(0,len(self.valid_moves)-1)
                 return self.valid_moves[move_idx]
             else:
                 return 'That strategy doesnt exist yet.'

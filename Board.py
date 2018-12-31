@@ -19,15 +19,24 @@ class Board:
         for point in test_piece.corners:
             if point[0] < 0 or point[1] < 0 or point[0] >= self.size or point[1] >= self.size:
                 return False
-            else:
-                if self.board[point[0],point[1]] == player or (point[0] == 0 and point[1] == 0):
+            
+        for point in test_piece.diag_adjacents:
+            #diagonal adjacency
+            if (point[0] >= 0 and point[1] >= 0 and point[0] < self.size and point[1] < self.size):
+                if self.board[point[0],point[1]] == player:
                     corner_adj = True
+                    break
+            # first move
+            elif point in [(-1,-1),(-1,self.size),(self.size,-1),(self.size,self.size)]:
+                corner_adj = True
+                break
         if corner_adj == False: return False
         
         #verify no adjacents occupied by player
         for point in test_piece.adjacents:
-            if self.board[point[0],point[1]] == player:
-                return False
+            if (point[0] >= 0 and point[1] >= 0 and point[0] < self.size and point[1] < self.size):
+                if self.board[point[0],point[1]] == player:
+                    return False
             
         #verify no occupied spaces already occupied
         for point in test_piece.occupied:
@@ -46,6 +55,9 @@ class Board:
         
     # play_piece
     def play_piece(self,player,piece):
-        for point in piece.occupied:
-            self.board[point[0],point[1]] = player
-        self.display()
+        if self.check_valid_move(player,piece):
+            for point in piece.occupied:
+                self.board[point[0],point[1]] = player
+            self.display()
+        else:
+            print('invalid move')
