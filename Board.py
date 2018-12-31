@@ -1,6 +1,9 @@
 from Piece import Piece
 import numpy as np
 import copy
+import matplotlib.pyplot as plt
+import math
+import seaborn as sns
 
 # Board class has board and size
 # views moves as a Piece object (already translated) and a player (integer from 1 to 4)
@@ -50,14 +53,15 @@ class Board:
         print(self.board)
 
     # display fancy
-    def display_fancy(self):
-        print("Sorry Dude, that function doesn't exist yet.")
+    def display2(self):
+        sns.heatmap(self.board,cmap = 'Pastel1', linewidths = 1, square = True,cbar = False)
         
     # play_piece
     def play_piece(self,player,piece):
         if self.check_valid_move(player,piece):
             for point in piece.occupied:
                 self.board[point[0],point[1]] = player
-            self.display()
         else:
             print('invalid move')
+            self.display()
+            print(piece.occupied)

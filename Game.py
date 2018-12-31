@@ -38,7 +38,6 @@ class Game():
         while turns_since_last_move < len(self.player_list):
             
             # select player to play
-            print(self.turn)
             current_player = self.player_list[self.turn-1]
             
             # ask player for move, then ask player to make move
@@ -66,12 +65,13 @@ class Game():
         
         return self.score()
     
-    #scores game based on number of squares occupied on board
+    #scores game based on number of squares occupied on board  FIX
     def score(self):
         scores= []
         for i in range(0,len(self.player_list)):
-            scores.append(np.sum(self.game_board == i+1).sum())    
-        return scores
+            scores.append(sum(sum(self.game_board.board == i+1)))    
+        return scores,self.game_board
+        
     
-game = Game(5,4,20)
-final_score = game.run()
+game = Game(5,2,20)
+final_score,board = game.run()
