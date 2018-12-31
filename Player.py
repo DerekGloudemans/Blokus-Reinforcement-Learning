@@ -122,3 +122,5 @@ class Player:
             self.update_removals.append(point)
         for point in temp.adjacents:
             self.update_removals.append(point)
+            
+        #def select_move():
