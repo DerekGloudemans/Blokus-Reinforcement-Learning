@@ -9,7 +9,7 @@ import copy
 class Player:
     
     #initialize
-    def __init__(self,player_num,size_in,board_size,board,pieces):
+    def __init__(self,player_num,size_in,board,pieces):
         
         self.num = player_num
        
@@ -20,11 +20,11 @@ class Player:
         if player_num == 1:
             self.valid_corners = [(0,0)]
         elif player_num == 2:
-            self.valid_corners = [(board_size-1,board_size-1)]
+            self.valid_corners = [(board.size-1,board.size-1)]
         elif player_num == 3:
-            self.valid_corners = [(0,board_size-1)]
+            self.valid_corners = [(0,board.size-1)]
         else :
-            self.valid_corners = [(board_size-1,0)]
+            self.valid_corners = [(board.size-1,0)]
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.changes = []
@@ -52,7 +52,7 @@ class Player:
                             
                             #check if move is valid
                             temp = copy.deepcopy(pieces[i][j])
-                            temp.translate(x,y)
+                            temp.translate((x,y))
                             if board.check_valid_move(self.num,temp):
                                 all_valid_moves.append((self.num,i,j,(x,y)))
             return all_valid_moves
