@@ -15,17 +15,7 @@ class Player:
         self.num = player_num
        
         # maintains a vector of played pieces (1 = played)
-        self.played = np.zeros([1,len(pieces)])
-    
-        # keep track of valid corners to play on (initialize to board corner only)
-        if player_num == 1:
-            self.valid_corners = [(0,0)]
-        elif player_num == 2:
-            self.valid_corners = [(board.size-1,board.size-1)]
-        elif player_num == 3:
-            self.valid_corners = [(0,board.size-1)]
-        else :
-            self.valid_corners = [(board.size-1,0)]
+        self.played = np.zeros([1,len(pieces)])        
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.update_new_corner_adjs = []
@@ -38,6 +28,15 @@ class Player:
     def init_valid_moves(self,board,pieces):
         all_valid_moves = []
         
+        if self.num == 1:
+            corner = (0,0)
+        elif self.num == 2:
+            corner = (board.size-1,board.size-1)
+        elif self.num == 3:
+            corner = (0,board.size-1)
+        else :
+            corner = (board.size-1,0)
+        
         # each i represents 1 piece
         for i in range (0,len(pieces)):
             #each j represents 1 orientation
@@ -48,23 +47,22 @@ class Player:
                 for k in range (0, 8):
                     if k >= len(pieces[i][j][0].corners):
                         break
-                    #each m represents one valid corner placement  on board for player
-                    for item in self.valid_corners:
-                        #find translation necessary to put piece corner into valid corner
-                        x = item[0] - pieces[i][j][0].corners[k][0]
-                        y = item[1] - pieces[i][j][0].corners[k][1]
-                        
-                        #check if move is valid
-                        temp = copy.deepcopy(pieces[i][j][0])
-                        temp.translate((x,y))
-                        if board.check_valid_move(self.num,temp):
-                            all_valid_moves.append((self.num,i,j,(x,y)))
+
+                    #find translation necessary to put piece corner into valid corner
+                    x = corner[0] - pieces[i][j][0].corners[k][0]
+                    y = corner[1] - pieces[i][j][0].corners[k][1]
+                    
+                    #check if move is valid
+                    temp = copy.deepcopy(pieces[i][j][0])
+                    temp.translate((x,y))
+                    if board.check_valid_move(self.num,temp):
+                        all_valid_moves.append((self.num,i,j,(x,y)))
         return all_valid_moves
         
         
     # update_valid_moves
     def update_valid_moves(self,board,pieces):
-        
+                
         # for item in new corner adjs: search all unplayed piece orientations and add
          # each i represents 1 piece
         for i in range (0,len(pieces)):
@@ -96,10 +94,6 @@ class Player:
                 if point in self.update_removals:
                     self.valid_moves.remove(move)
                     break
-        # also check if square was a valid_corner and remove
-        for point in self.update_removals:
-            if point in self.valid_corners:
-                self.valid_corners.remove(point)
         
         #reset update lists
         self.update_new_corner_adjs = []

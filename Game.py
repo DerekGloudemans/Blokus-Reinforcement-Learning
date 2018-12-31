@@ -53,7 +53,8 @@ class Game():
                 
                 # append points in play to each player's update lists
                 for player in self.player_list:
-                    player.update_removals.append(update_squares)
+                    for item in update_squares:
+                        player.update_removals.append(item)
                 
                 turns_since_last_move = 0
            
