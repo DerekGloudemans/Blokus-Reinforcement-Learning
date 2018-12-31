@@ -38,10 +38,11 @@ class Game():
         while turns_since_last_move < len(self.player_list):
             
             # select player to play
-            current_player = self.player_list(self.turn)
+            print(self.turn)
+            current_player = self.player_list[self.turn-1]
             
             # ask player for move, then ask player to make move
-            move = current_player.select_move(self.turn,self.board,self.pieces,strategy = 'random')
+            move = current_player.select_move(self.game_board,self.pieces, 'random')
             
             # if no move could be made, increment counter by 1
             # else reset counter to 0
@@ -49,7 +50,7 @@ class Game():
                 turns_since_last_move = turns_since_last_move + 1
             else:
                 # make move and save move made to self.board
-                update_squares = current_player.make_move(self.turn,self.board,self.pieces)
+                update_squares = current_player.make_move(move,self.game_board,self.pieces)
                 
                 # append points in play to each player's update lists
                 for player in self.player_list:
@@ -61,7 +62,7 @@ class Game():
             # eventually, log each move
             
             # change to next player
-            self.turn = self.turn % 4 + 1
+            self.turn = self.turn % len(self.player_list) + 1
         
         return self.score()
     
@@ -71,4 +72,6 @@ class Game():
         for i in range(0,len(self.player_list)):
             scores.append(np.sum(self.board == i+1).sum())    
         return scores
-            
+    
+game = Game(5,2,20)
+game.run()

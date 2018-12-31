@@ -68,7 +68,7 @@ class Player:
         # for item in new corner adjs: search all unplayed piece orientations and add
          # each i represents 1 piece
         for i in range (0,len(pieces)):
-            if self.played[i] == 0:
+            if self.played[0,i] == 0:
                 #each j represents 1 orientation
                 for j in range (0,8):
                     if j >= len(pieces[i]):
@@ -78,13 +78,13 @@ class Player:
                         if k >= len(pieces[i][j][0].corners):
                             break
                         #each m represents one valid corner placement  on board for player
-                        for item in self.update_new_corner_adj:
+                        for item in self.update_new_corner_adjs:
                             #find translation necessary to put piece corner into valid corner
                             x = item[0] - pieces[i][j][0].corners[k][0]
                             y = item[1] - pieces[i][j][0].corners[k][1]
                             
                             #check if move is valid
-                            temp = copy.deepcopy(pieces[i][j])
+                            temp = copy.deepcopy(pieces[i][j][0])
                             temp.translate((x,y))
                             if board.check_valid_move(self.num,temp):
                                 self.valid_moves.append((self.num,i,j,(x,y)))              
@@ -95,12 +95,12 @@ class Player:
             for point in temp_piece.occupied:
                 if point in self.update_removals:
                     self.valid_moves.remove(move)
-                    
+                    break
         # also check if square was a valid_corner and remove
         for point in self.update_removals:
             if point in self.valid_corners:
                 self.valid_corners.remove(point)
-                
+        
         #reset update lists
         self.update_new_corner_adjs = []
         self.update_removals = []
@@ -115,7 +115,7 @@ class Player:
         board.play_piece(self.num,temp)
         
         # update played_pieces
-        self.played[move[1]] = 1
+        self.played[0,move[1]] = 1
         
         # remove from valid_moves all move with this piece
         for item in self.valid_moves:
@@ -123,7 +123,7 @@ class Player:
                 self.valid_moves.remove(item)
                 
         # add new corner_adjs to update_list
-        for point in temp.corner_adjs:
+        for point in temp.diag_adjacents:
             self.update_new_corner_adjs.append(point)
             
         # add occupieds and adjacents to update_list
