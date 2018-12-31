@@ -27,40 +27,63 @@ class Player:
             self.valid_corners = [(board.size-1,0)]
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
-        self.changes = []
+        self.update_new_corner_adjs = []
+        self.update_removals = []
         
         # maintain a list of valid moves
-        self.valid_moves = []
-        self.valid_moves = self.get_valid_moves(board)
+        self.valid_moves = self.init_valid_moves(board)
     
-    def get_valid_moves(self,board,pieces):
-        if self.valid_moves == []: #first turn
+    # initialize valid move list
+    def init_valid_moves(self,board,pieces):
+        all_valid_moves = []
         
-            all_valid_moves = []
-            
-            # each i represents 1 piece
-            for i in range (0,len(pieces)):
-                #each j represents 1 orientation
-                for j in range (0,pieces[i]):
-                    #each k represents 1 corner of the piece
-                    for k in range (0, len(pieces[i][j].corners)):
-                        #each m represents one valid corner pplacement  on board for player
-                        for m in range (0, len(self.valid_corners)):
-                            #find translation necessary to put piece corner into valid corner
-                            x = self.valid_corners[m][0] - pieces[i][j].corners[k][0]
-                            y = self.valid_corners[m][1] - pieces[i][j].corners[k][1]
-                            
-                            #check if move is valid
-                            temp = copy.deepcopy(pieces[i][j])
-                            temp.translate((x,y))
-                            if board.check_valid_move(self.num,temp):
-                                all_valid_moves.append((self.num,i,j,(x,y)))
-            return all_valid_moves
-        
-        else: #valid moves list already exists
-            return []
+        # each i represents 1 piece
+        for i in range (0,len(pieces)):
+            #each j represents 1 orientation
+            for j in range (0,pieces[i]):
+                #each k represents 1 corner of the piece
+                for k in range (0, len(pieces[i][j].corners)):
+                    #each m represents one valid corner placement  on board for player
+                    for m in range (0, len(self.valid_corners)):
+                        #find translation necessary to put piece corner into valid corner
+                        x = self.valid_corners[m][0] - pieces[i][j].corners[k][0]
+                        y = self.valid_corners[m][1] - pieces[i][j].corners[k][1]
+                        
+                        #check if move is valid
+                        temp = copy.deepcopy(pieces[i][j])
+                        temp.translate((x,y))
+                        if board.check_valid_move(self.num,temp):
+                            all_valid_moves.append((self.num,i,j,(x,y)))
+        return all_valid_moves
         
         
     # update_valid_moves
+    
     # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
+    # a move will be stored as (player,piece_num,orientation,translation)
+    def make_move(self,move,board,pieces):
+        # call make_move on board
+        temp = copy.deepcopy(pieces[move[1]][move[2]])
+        temp.translate(move[3])
+        board.play_piece(self.num,temp)
+        
+        # update played_pieces
+        self.played[move[1]] = 1
+        
+        # remove from valid_moves all move with this piece
+        for item in self.valid_moves:
+            if item[1] == move[1]:
+                self.valid_moves.remove(item)
+                
+        # add new corner_adjs to update_list
+        for point in temp.corner_adjs:
+            self.update_new_corner_adjs.append(point)
+            
+        # add occupieds and adjacents to update_list
+        for point in temp.occupied:
+            self.update_removals.append(point)
+        for point in temp.adjacents:
+            self.update_removals.append(point)
+            
+        
     # get_score
