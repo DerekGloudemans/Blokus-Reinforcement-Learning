@@ -58,6 +58,44 @@ class Player:
         
         
     # update_valid_moves
+    def update_valid_moves(self,pieces,board):
+        
+        # for item in new corner adjs: search all unplayed piece orientations and add
+         # each i represents 1 piece
+        for i in range (0,len(pieces)):
+            if self.played[i] == 0:
+                #each j represents 1 orientation
+                for j in range (0,pieces[i]):
+                    #each k represents 1 corner of the piece
+                    for k in range (0, len(pieces[i][j].corners)):
+                        #each m represents one valid corner placement  on board for player
+                        for m in range (0, len(self.update_new_corner_adjs)):
+                            #find translation necessary to put piece corner into valid corner
+                            x = self.update_new_corner_adjs[m][0] - pieces[i][j].corners[k][0]
+                            y = self.update_new_corner_adjs[m][1] - pieces[i][j].corners[k][1]
+                            
+                            #check if move is valid
+                            temp = copy.deepcopy(pieces[i][j])
+                            temp.translate((x,y))
+                            if board.check_valid_move(self.num,temp):
+                                self.valid_moves.append((self.num,i,j,(x,y)))              
+        
+        # for item in removed_squares: search all valid_moves for moves that occupy this square and remove
+        for move in self.valid_moves:
+            temp_piece = pieces[move[1]][move[2]]
+            for point in temp_piece.occupied:
+                if point in self.update_removals:
+                    self.valid_moves.remove(move)
+                    
+        # also check if square was a valid_corner and remove
+        for point in self.update_removals:
+            if point in self.valid_corners:
+                self.valid_corners.remove(point)
+                
+        #reset update lists
+        self.update_new_corner_adjs = []
+        self.update_removals = []
+        
     
     # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
     # a move will be stored as (player,piece_num,orientation,translation)
@@ -84,6 +122,3 @@ class Player:
             self.update_removals.append(point)
         for point in temp.adjacents:
             self.update_removals.append(point)
-            
-        
-    # get_score

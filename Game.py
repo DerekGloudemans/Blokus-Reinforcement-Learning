@@ -7,7 +7,7 @@ import copy
 #Game class:
 #maintains 4 player objects in a structure
 
-#when initialized, creates a board, piecelist (common to all players), 4 players, and a turn-marker
+#when initialized, creates a board, piecelist (common to all players), players, and a turn-marker
     
         #loads piece shapes from file
         f = open('blokus_pieces_lim_5.pkl', 'rb')
