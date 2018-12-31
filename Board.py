@@ -14,15 +14,17 @@ class Board:
         self.size = size
 
 # moves are expressed as a translated (player,piece_num,orientation,translation (x,y))
-    def check_valid_move(self, player,test_piece):                
+    def check_valid_move(self, player,test_piece,verbose = False):                
        
         #verify each corner falls within bounds
-        #verify at least one corner adjacent belongs to player or first move
         corner_adj = False
         for point in test_piece.corners:
             if point[0] < 0 or point[1] < 0 or point[0] >= self.size or point[1] >= self.size:
+                if verbose:
+                    print("A corner is out of bounds: {}".format(point))
                 return False
             
+        #verify at least one corner adjacent belongs to player or first move    
         for point in test_piece.diag_adjacents:
             #diagonal adjacency
             if (point[0] >= 0 and point[1] >= 0 and point[0] < self.size and point[1] < self.size):
@@ -33,17 +35,24 @@ class Board:
             elif point in [(-1,-1),(-1,self.size),(self.size,-1),(self.size,self.size)]:
                 corner_adj = True
                 break
-        if corner_adj == False: return False
+        if corner_adj == False: 
+            if verbose:
+                    print("No adjacent corners.")
+            return False
         
         #verify no adjacents occupied by player
         for point in test_piece.adjacents:
             if (point[0] >= 0 and point[1] >= 0 and point[0] < self.size and point[1] < self.size):
                 if self.board[point[0],point[1]] == player:
+                    if verbose:
+                        print("Adjacent to an existing piece: {}".format(point))
                     return False
             
         #verify no occupied spaces already occupied
         for point in test_piece.occupied:
             if self.board[point[0],point[1]] != 0:
+                if verbose:
+                    print("Point is already occupied: {}".format(point))
                 return False
         
         return True
@@ -58,7 +67,7 @@ class Board:
         
     # play_piece
     def play_piece(self,player,piece):
-        if self.check_valid_move(player,piece):
+        if self.check_valid_move(player,piece,verbose = True):
             for point in piece.occupied:
                 self.board[point[0],point[1]] = player
         else:
