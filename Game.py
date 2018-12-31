@@ -13,7 +13,7 @@ class Game():
     def __init__(self,piece_size,num_players,board_size):
         self.game_board = Board(board_size)
         
-        #loads piece shapes from file
+        #loads piece shapes from file  --- Need to create a new pickle since class was redefined
         f = open('blokus_pieces_lim_5.pkl', 'rb')
         all_pieces = pickle.load(f)
         f.close()
@@ -21,8 +21,7 @@ class Game():
         self.pieces = []
         for piece in all_pieces:
             if piece.size <= piece_size:
-                temp = Piece(piece_size,piece)
-                self.pieces.append(temp.get_orientations())
+                self.pieces.append(piece.get_orientations())
                
         self.player_list = []
         for i in range (1,num_players+1):

@@ -31,7 +31,7 @@ class Player:
         self.update_removals = []
         
         # maintain a list of valid moves
-        self.valid_moves = self.init_valid_moves(board)
+        self.valid_moves = self.init_valid_moves(board,pieces)
     
     # initialize valid move list
     def init_valid_moves(self,board,pieces):
@@ -40,17 +40,21 @@ class Player:
         # each i represents 1 piece
         for i in range (0,len(pieces)):
             #each j represents 1 orientation
-            for j in range (0,pieces[i]):
+            for j in range (0,8):
+                if j >= len(pieces[i]):
+                    break
                 #each k represents 1 corner of the piece
-                for k in range (0, len(pieces[i][j].corners)):
+                for k in range (0, 8):
+                    if k >= len(pieces[i][j][0].corners):
+                        break
                     #each m represents one valid corner placement  on board for player
-                    for m in range (0, len(self.valid_corners)):
+                    for item in self.valid_corners:
                         #find translation necessary to put piece corner into valid corner
-                        x = self.valid_corners[m][0] - pieces[i][j].corners[k][0]
-                        y = self.valid_corners[m][1] - pieces[i][j].corners[k][1]
+                        x = item[0] - pieces[i][j][0].corners[k][0]
+                        y = item[1] - pieces[i][j][0].corners[k][1]
                         
                         #check if move is valid
-                        temp = copy.deepcopy(pieces[i][j])
+                        temp = copy.deepcopy(pieces[i][j][0])
                         temp.translate((x,y))
                         if board.check_valid_move(self.num,temp):
                             all_valid_moves.append((self.num,i,j,(x,y)))
@@ -65,14 +69,18 @@ class Player:
         for i in range (0,len(pieces)):
             if self.played[i] == 0:
                 #each j represents 1 orientation
-                for j in range (0,pieces[i]):
+                for j in range (0,8):
+                    if j >= len(pieces[i]):
+                        break
                     #each k represents 1 corner of the piece
-                    for k in range (0, len(pieces[i][j].corners)):
+                    for k in range (0, 8):
+                        if k >= len(pieces[i][j][0].corners):
+                            break
                         #each m represents one valid corner placement  on board for player
-                        for m in range (0, len(self.update_new_corner_adjs)):
+                        for item in self.update_new_corner_adj:
                             #find translation necessary to put piece corner into valid corner
-                            x = self.update_new_corner_adjs[m][0] - pieces[i][j].corners[k][0]
-                            y = self.update_new_corner_adjs[m][1] - pieces[i][j].corners[k][1]
+                            x = item[0] - pieces[i][j][0].corners[k][0]
+                            y = item[1] - pieces[i][j][0].corners[k][1]
                             
                             #check if move is valid
                             temp = copy.deepcopy(pieces[i][j])
@@ -82,7 +90,7 @@ class Player:
         
         # for item in removed_squares: search all valid_moves for moves that occupy this square and remove
         for move in self.valid_moves:
-            temp_piece = pieces[move[1]][move[2]]
+            temp_piece = pieces[move[1]][move[2]][0]
             for point in temp_piece.occupied:
                 if point in self.update_removals:
                     self.valid_moves.remove(move)
@@ -101,7 +109,7 @@ class Player:
     # a move will be stored as (player,piece_num,orientation,translation)
     def make_move(self,move,board,pieces):
         # call make_move on board
-        temp = copy.deepcopy(pieces[move[1]][move[2]])
+        temp = copy.deepcopy(pieces[move[1]][move[2]][0])
         temp.translate(move[3])
         board.play_piece(self.num,temp)
         
