@@ -3,6 +3,7 @@ from Board import Board
 import pickle
 import numpy as np
 import copy
+import random
 
 # a move will be stored as (player,piece_num,orientation,translation)
 
@@ -126,9 +127,30 @@ class Player:
             self.update_new_corner_adjs.append(point)
             
         # add occupieds and adjacents to update_list
+        update_occupieds = []
         for point in temp.occupied:
             self.update_removals.append(point)
+            update_occupieds.append(point)
         for point in temp.adjacents:
             self.update_removals.append(point)
-            
-        #def select_move():
+        
+        # returns all squares occupied this turn to be added to other players update_removals lists
+        return update_occupieds
+        
+    
+    # update list of valid moves, then select a move from the list (randomly for now)
+    # return as move
+    # a move will be stored as (player,piece_num,orientation,translation)
+    def select_move(self,board,pieces,strategy):
+        
+        #update list of valid moves
+        self.update_valid_moves(board,pieces)
+        
+        if len(self.valid_moves) == 0:
+            return False
+        else:
+            if strategy == 'random':
+                move_idx = random.randint(0,len(self.valid_moves))
+                return self.valid_moves[move_idx]
+            else:
+                return 'That strategy doesnt exist yet.'

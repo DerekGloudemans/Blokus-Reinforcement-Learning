@@ -48,4 +48,4 @@ class Board:
     def play_piece(self,player,piece):
         for point in piece.occupied:
             self.board[point[0],point[1]] = player
-    
+        self.display()

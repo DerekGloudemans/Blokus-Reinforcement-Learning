@@ -41,7 +41,7 @@ class Game():
             current_player = self.player_list(self.turn)
             
             # ask player for move, then ask player to make move
-            move = current_player.select_move(self.turn,self.board,self.pieces)
+            move = current_player.select_move(self.turn,self.board,self.pieces,strategy = 'random')
             
             # if no move could be made, increment counter by 1
             # else reset counter to 0
