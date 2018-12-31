@@ -31,8 +31,44 @@ class Game():
         self.turn = 1
         
 
-#run()
-#queries each player for a move, then makes move
-#logs each move
-# keeps track of when game is over
-# saves game log at end of game
+    def run(self):
+        
+        # Ends game if no player can make a move
+        turns_since_last_move = 0
+        while turns_since_last_move < len(self.player_list):
+            
+            # select player to play
+            current_player = self.player_list(self.turn)
+            
+            # ask player for move, then ask player to make move
+            move = current_player.select_move(self.turn,self.board,self.pieces)
+            
+            # if no move could be made, increment counter by 1
+            # else reset counter to 0
+            if  move == False: #no move available
+                turns_since_last_move = turns_since_last_move + 1
+            else:
+                # make move and save move made to self.board
+                update_squares = current_player.make_move(self.turn,self.board,self.pieces)
+                
+                # append points in play to each player's update lists
+                for player in self.player_list:
+                    player.update_removals.append(update_squares)
+                
+                turns_since_last_move = 0
+           
+            
+            # eventually, log each move
+            
+            # change to next player
+            self.turn = self.turn % 4 + 1
+        
+        return self.score()
+    
+    #scores game based on number of squares occupied on board
+    def score(self):
+        scores= []
+        for i in range(0,len(self.player_list)):
+            scores.append(np.sum(self.board == i+1).sum())    
+        return scores
+            

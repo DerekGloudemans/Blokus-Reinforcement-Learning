@@ -62,7 +62,7 @@ class Player:
         
         
     # update_valid_moves
-    def update_valid_moves(self,pieces,board):
+    def update_valid_moves(self,board,pieces):
         
         # for item in new corner adjs: search all unplayed piece orientations and add
          # each i represents 1 piece
