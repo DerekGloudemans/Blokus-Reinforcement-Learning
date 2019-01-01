@@ -75,6 +75,7 @@ class Board:
             return True
         else:
             print('invalid move')
-            self.display()
             print(piece.occupied)
             return False
+        
+        #self.display()

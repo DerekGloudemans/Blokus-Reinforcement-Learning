@@ -11,12 +11,13 @@ class Player:
     
     #initialize
     def __init__(self,player_num,size_in,board,pieces):
-        
+    
         self.num = player_num
        
         # maintains a vector of played pieces (1 = played)
         self.played = np.ones([len(pieces)])
-        self.played[0:22] = 0        
+        # MIKE Changed this; should be 21 pieces
+        self.played[0:21] = 0
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.update_new_corner_adjs = []
@@ -27,6 +28,9 @@ class Player:
         self.init_valid_moves(board,pieces)
         
     # initialize valid move list
+    # Note from Mike: Not top priority, but I wonder if some of the code
+    # from this function could be easily combined with the update_valid_moves
+    # function to avoid duplication?                                                                            
     def init_valid_moves(self,board,pieces):
         all_valid_moves = []
         
@@ -59,9 +63,12 @@ class Player:
                         temp = copy.deepcopy(pieces[i][j][0])
                         temp.translate((x,y))
                         if board.check_valid_move(self.num,temp):
+                            # Note from Mike: It may actually be helpful to create a Move class
+                            # not because this is a bad format as it is, but because it would
+                            # improve understandability                                                   
                             all_valid_moves.append((self.num,i,j,(x,y)))
         self.valid_moves =  all_valid_moves
-                   
+                                   
         
     # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
     # a move will be stored as (player,piece_num,orientation,translation)
@@ -90,7 +97,9 @@ class Player:
                             temp = copy.deepcopy(pieces[i][j][0])
                             temp.translate((x,y))
                             if board.check_valid_move(self.num,temp):
-                                self.valid_moves.append((self.num,i,j,(x,y)))              
+                                self.valid_moves.append((self.num,i,j,(x,y)))         
+
+        
 
         # get list of changed squares
         # check for played piece, check for newly occupied square, and check for adjacents
@@ -104,11 +113,14 @@ class Player:
         # add adjacents from last move to bad_squares list
         for point in self.update_adjacents_to_last_played:
             bad_squares.append(point)
-                    
+ 
         for move in self.valid_moves:
-            temp_piece = pieces[move[1]][move[2]][0]
+            temp_piece = copy.deepcopy(pieces[move[1]][move[2]][0])
+            temp_piece.translate(move[3])
+            
             # check if any piece squares are now occupied
             for point in bad_squares:
+                
                 if point in temp_piece.occupied:
                     self.valid_moves.remove(move)
                     break
@@ -119,7 +131,9 @@ class Player:
                 for move in self.valid_moves:
                     if move[1] == i:
                         self.valid_moves.remove(move)
+                        
         
+                        
         success = False
         while success == False:
             #Step 2 - select a move from valid moves
