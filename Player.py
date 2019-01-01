@@ -125,14 +125,12 @@ class Player:
                     self.valid_moves.remove(move)
                     break
                 
-        # check for repeat pieces
         for i in range (0,len(self.played)):
             if self.played[i] == 1:
-                for move in self.valid_moves:
+                for move_index in reversed(range((len(self.valid_moves)))):
+                    move = self.valid_moves[move_index]
                     if move[1] == i:
-                        self.valid_moves.remove(move)
-                        
-        
+                        del self.valid_moves[move_index]
                         
         success = False
         while success == False:
@@ -158,11 +156,6 @@ class Player:
         print("Success")
         self.played[move[1]] = 1
         
-#        # remove from valid_moves all move with this piece
-#        for item in self.valid_moves:
-#            if item[1] == move[1]:
-#                self.valid_moves.remove(item)
-                
         #reset update lists
         self.update_new_corner_adjs = []
         self.update_adjacents_to_last_played = []  
