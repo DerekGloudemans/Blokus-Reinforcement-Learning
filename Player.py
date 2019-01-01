@@ -15,7 +15,7 @@ class Player:
         self.num = player_num
        
         # maintains a vector of played pieces (1 = played)
-        self.played = np.zeros([1,len(pieces)])        
+        self.played = np.zeros([len(pieces)])        
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.update_new_corner_adjs = []
@@ -66,7 +66,7 @@ class Player:
         # for item in new corner adjs: search all unplayed piece orientations and add
          # each i represents 1 piece
         for i in range (0,len(pieces)):
-            if self.played[0,i] == 0:
+            if self.played[i] == 0:
                 #each j represents 1 orientation
                 for j in range (0,8):
                     if j >= len(pieces[i]):
@@ -87,11 +87,17 @@ class Player:
                             if board.check_valid_move(self.num,temp):
                                 self.valid_moves.append((self.num,i,j,(x,y)))              
         
-        # for item in removed_squares: search all valid_moves for moves that occupy this square and remove
-        for move in self.valid_moves:
+#        # for item in removed_squares: search all valid_moves for moves that occupy this square and remove
+#        for move in self.valid_moves:
+#            temp_piece = pieces[move[1]][move[2]][0]
+#            for point in temp_piece.occupied:
+#                if point in self.update_removals:
+#                    self.valid_moves.remove(move)
+#                    break
+        for move in self.valid_moves:                        
             temp_piece = pieces[move[1]][move[2]][0]
             for point in temp_piece.occupied:
-                if point in self.update_removals:
+                if board.board[point[0],point[1]] != 0:
                     self.valid_moves.remove(move)
                     break
         
@@ -109,7 +115,7 @@ class Player:
         board.play_piece(self.num,temp)
         
         # update played_pieces
-        self.played[0,move[1]] = 1
+        self.played[move[1]] = 1
         
         # remove from valid_moves all move with this piece
         for item in self.valid_moves:

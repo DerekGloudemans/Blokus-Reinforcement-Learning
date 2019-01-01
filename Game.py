@@ -4,6 +4,7 @@ from Player import Player
 import numpy as np
 import copy
 import pickle
+import random
 
 #Game class:
 #maintains 4 player objects in a structure
@@ -73,6 +74,6 @@ class Game():
             scores.append(sum(sum(self.game_board.board == i+1)))    
         return scores,self.game_board
         
-    
+random.seed(0)
 game = Game(5,2,20)
 final_score,board = game.run()
