@@ -21,11 +21,13 @@ class Game():
         
         self.pieces = []
         for piece in all_pieces:
+            # TODO: Piece size other than 5 doesn't work                                                        
             if piece.size <= piece_size:
                 self.pieces.append(piece.get_orientations())
                
         self.player_list = []
         for i in range (1,num_players+1):
+            # Note from Mike: I don't think piece_size is a necessary attribute for the Player object
             new_player = Player(i,piece_size,self.game_board,self.pieces)
             self.player_list.append(new_player)
             
@@ -36,7 +38,16 @@ class Game():
         
         # Ends game if no player can make a move
         turns_since_last_move = 0
-        while turns_since_last_move < len(self.player_list):
+        while turns_since_last_move <= len(self.player_list):
+        
+            print(self.turn)
+            #self.game_board.display2()
+            print(self.player_list[0].played)
+            print(self.player_list[1].played)
+            print(self.player_list[2].played)
+            print(self.player_list[3].played)
+            print("\n\n")
+            
             
             # select player to play
             current_player = self.player_list[self.turn-1]
@@ -53,13 +64,11 @@ class Game():
             
             # eventually, log each move
             
+            
             # change to next player
+
             self.turn = self.turn % len(self.player_list) + 1
-            
-            self.game_board.display2()
-            print(self.player_list[0].played)
-            print("\n\n")
-            
+
         return self.score()
     
     #scores game based on number of squares occupied on board  FIX
@@ -69,7 +78,10 @@ class Game():
             scores.append(sum(sum(self.game_board.board == i+1)))    
         return scores,self.game_board,self.player_list
         
+import random      
 random.seed(0)
+import os
+os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
 game = Game(5,4,20)
 final_score,board,player_list = game.run()
 board.display2()
