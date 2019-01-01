@@ -157,8 +157,8 @@ class Player:
                 self.valid_moves.remove(move)
                 print("Attempted to play a failed move")
                 board.display2()
+                
         # update played_pieces
-        print("Success")
         self.played[move[1]] = 1
         
         #reset update lists

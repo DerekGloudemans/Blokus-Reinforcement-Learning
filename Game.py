@@ -34,20 +34,20 @@ class Game():
         self.turn = 1
         
 
-    def run(self):
+    def run(self, verbose = True):
         
         # Ends game if no player can make a move
         turns_since_last_move = 0
         while turns_since_last_move <= len(self.player_list):
-        
-            print(self.turn)
-            #self.game_board.display2()
-            print(self.player_list[0].played)
-            print(self.player_list[1].played)
-            print(self.player_list[2].played)
-            print(self.player_list[3].played)
-            print("\n\n")
-            
+            if verbose:
+                print(self.turn)
+                #self.game_board.display2()
+                print(self.player_list[0].played)
+                print(self.player_list[1].played)
+                print(self.player_list[2].played)
+                print(self.player_list[3].played)
+                print("\n\n")
+                self.game_board.display2()
             
             # select player to play
             current_player = self.player_list[self.turn-1]
@@ -66,7 +66,6 @@ class Game():
             
             
             # change to next player
-
             self.turn = self.turn % len(self.player_list) + 1
 
         return self.score()
@@ -76,12 +75,10 @@ class Game():
         scores= []
         for i in range(0,len(self.player_list)):
             scores.append(sum(sum(self.game_board.board == i+1)))    
-        return scores,self.game_board,self.player_list
+        return scores
         
-import random      
 random.seed(0)
-import os
-os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
+#import os
+#os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
 game = Game(5,4,20)
-final_score,board,player_list = game.run()
-board.display2()
+final_score = game.run()
