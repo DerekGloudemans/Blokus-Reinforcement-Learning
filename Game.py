@@ -39,6 +39,15 @@ class Game():
         # Ends game if no player can make a move
         turns_since_last_move = 0
         while turns_since_last_move <= len(self.player_list):
+        
+            print(self.turn)
+            #self.game_board.display2()
+            print(self.player_list[0].played)
+            print(self.player_list[1].played)
+            print(self.player_list[2].played)
+            print(self.player_list[3].played)
+            print("\n\n")
+            
             
             # select player to play
             current_player = self.player_list[self.turn-1]
@@ -55,19 +64,11 @@ class Game():
             
             # eventually, log each move
             
-            print(self.turn)
             
             # change to next player
 
             self.turn = self.turn % len(self.player_list) + 1
-            
-            #self.game_board.display2()
-            print(self.player_list[0].played)
-            print(self.player_list[1].played)
-            print(self.player_list[2].played)
-            print(self.player_list[3].played)
-            print("\n\n")
-            
+
         return self.score()
     
     #scores game based on number of squares occupied on board  FIX

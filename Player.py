@@ -110,20 +110,24 @@ class Player:
             for j in range(0,board.size):
                 if check[i,j] != 0:
                     bad_squares.append((i,j))
+                    
         # add adjacents from last move to bad_squares list
         for point in self.update_adjacents_to_last_played:
             bad_squares.append(point)
- 
-        for move in self.valid_moves:
+            
+        # check if any piece squares are now occupied or are
+        # adjacent to player's own pieces
+        for move_index in reversed(range((len(self.valid_moves)))):
+            move = self.valid_moves[move_index]
             temp_piece = copy.deepcopy(pieces[move[1]][move[2]][0])
             temp_piece.translate(move[3])
             
-            # check if any piece squares are now occupied
             for point in bad_squares:
                 
                 if point in temp_piece.occupied:
-                    self.valid_moves.remove(move)
+                    del self.valid_moves[move_index]
                     break
+                
                 
         for i in range (0,len(self.played)):
             if self.played[i] == 1:
@@ -152,6 +156,7 @@ class Player:
             if success == False:
                 self.valid_moves.remove(move)
                 print("Attempted to play a failed move")
+                board.display2()
         # update played_pieces
         print("Success")
         self.played[move[1]] = 1
