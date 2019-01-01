@@ -63,14 +63,18 @@ class Board:
 
     # display fancy
     def display2(self):
+        plt.figure()
         sns.heatmap(self.board,cmap = 'Accent', linewidths = 1, square = True,cbar = False)
+        plt.show()
         
     # play_piece
     def play_piece(self,player,piece):
         if self.check_valid_move(player,piece,verbose = True):
             for point in piece.occupied:
                 self.board[point[0],point[1]] = player
+            return True
         else:
             print('invalid move')
             self.display()
             print(piece.occupied)
+            return False

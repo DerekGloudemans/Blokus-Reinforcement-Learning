@@ -55,7 +55,11 @@ class Game():
             
             # change to next player
             self.turn = self.turn % len(self.player_list) + 1
-        
+            
+            self.game_board.display2()
+            print(self.player_list[0].played)
+            print("\n\n")
+            
         return self.score()
     
     #scores game based on number of squares occupied on board  FIX
@@ -63,8 +67,9 @@ class Game():
         scores= []
         for i in range(0,len(self.player_list)):
             scores.append(sum(sum(self.game_board.board == i+1)))    
-        return scores,self.game_board
+        return scores,self.game_board,self.player_list
         
 random.seed(0)
-game = Game(5,2,20)
-final_score,board = game.run()
+game = Game(5,4,20)
+final_score,board,player_list = game.run()
+board.display2()

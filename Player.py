@@ -15,7 +15,8 @@ class Player:
         self.num = player_num
        
         # maintains a vector of played pieces (1 = played)
-        self.played = np.zeros([len(pieces)])        
+        self.played = np.ones([len(pieces)])
+        self.played[0:22] = 0        
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.update_new_corner_adjs = []
@@ -23,8 +24,8 @@ class Player:
         self.board_before_previous_play = copy.deepcopy(board)
         
         # maintain a list of valid moves
-        self.valid_moves = self.init_valid_moves(board,pieces)
-    
+        self.init_valid_moves(board,pieces)
+        
     # initialize valid move list
     def init_valid_moves(self,board,pieces):
         all_valid_moves = []
@@ -41,24 +42,25 @@ class Player:
         # each i represents 1 piece
         for i in range (0,len(pieces)):
             #each j represents 1 orientation
-            for j in range (0,8):
-                if j >= len(pieces[i]):
-                    break
-                #each k represents 1 corner of the piece
-                for k in range (0, 8):
-                    if k >= len(pieces[i][j][0].corners):
+            if self.played[i] == 0:
+                for j in range (0,8):
+                    if j >= len(pieces[i]):
                         break
-
-                    #find translation necessary to put piece corner into valid corner
-                    x = corner[0] - pieces[i][j][0].corners[k][0]
-                    y = corner[1] - pieces[i][j][0].corners[k][1]
-                    
-                    #check if move is valid
-                    temp = copy.deepcopy(pieces[i][j][0])
-                    temp.translate((x,y))
-                    if board.check_valid_move(self.num,temp):
-                        all_valid_moves.append((self.num,i,j,(x,y)))
-        return all_valid_moves
+                    #each k represents 1 corner of the piece
+                    for k in range (0, 8):
+                        if k >= len(pieces[i][j][0].corners):
+                            break
+    
+                        #find translation necessary to put piece corner into valid corner
+                        x = corner[0] - pieces[i][j][0].corners[k][0]
+                        y = corner[1] - pieces[i][j][0].corners[k][1]
+                        
+                        #check if move is valid
+                        temp = copy.deepcopy(pieces[i][j][0])
+                        temp.translate((x,y))
+                        if board.check_valid_move(self.num,temp):
+                            all_valid_moves.append((self.num,i,j,(x,y)))
+        self.valid_moves =  all_valid_moves
                    
         
     # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
@@ -104,40 +106,48 @@ class Player:
             bad_squares.append(point)
                     
         for move in self.valid_moves:
-            #check if piece has already been played
-            if self.played[move[1]] == 1:
-                self.valid_moves.remove(move)
-            else:
-                temp_piece = pieces[move[1]][move[2]][0]
-                # check if any piece squares are now occupied
-                for point in bad_squares:
-                    if point in temp_piece.occupied:
+            temp_piece = pieces[move[1]][move[2]][0]
+            # check if any piece squares are now occupied
+            for point in bad_squares:
+                if point in temp_piece.occupied:
+                    self.valid_moves.remove(move)
+                    break
+                
+        # check for repeat pieces
+        for i in range (0,len(self.played)):
+            if self.played[i] == 1:
+                for move in self.valid_moves:
+                    if move[1] == i:
                         self.valid_moves.remove(move)
-                        break
         
-        #Step 2 - select a move from valid moves
-        if len(self.valid_moves) == 0:
-            return False
-        else:
-            if strategy == 'random':
-                move_idx = random.randint(0,len(self.valid_moves)-1)
-                move = self.valid_moves[move_idx]
+        success = False
+        while success == False:
+            #Step 2 - select a move from valid moves
+            if len(self.valid_moves) == 0:
+                return False
             else:
-                return 'That strategy doesnt exist yet.'
-        
-        #Step 3 - make move
-        # call make_move on board
-        temp = copy.deepcopy(pieces[move[1]][move[2]][0])
-        temp.translate(move[3])
-        board.play_piece(self.num,temp)
-        
+                if strategy == 'random':
+                    move_idx = random.randint(0,len(self.valid_moves)-1)
+                    move = self.valid_moves[move_idx]
+                else:
+                    return 'That strategy doesnt exist yet.'
+            
+            #Step 3 - make move
+            # call make_move on board
+            temp = copy.deepcopy(pieces[move[1]][move[2]][0])
+            temp.translate(move[3])
+            success = board.play_piece(self.num,temp)
+            if success == False:
+                self.valid_moves.remove(move)
+                print("Attempted to play a failed move")
         # update played_pieces
+        print("Success")
         self.played[move[1]] = 1
         
-        # remove from valid_moves all move with this piece
-        for item in self.valid_moves:
-            if item[1] == move[1]:
-                self.valid_moves.remove(item)
+#        # remove from valid_moves all move with this piece
+#        for item in self.valid_moves:
+#            if item[1] == move[1]:
+#                self.valid_moves.remove(item)
                 
         #reset update lists
         self.update_new_corner_adjs = []
