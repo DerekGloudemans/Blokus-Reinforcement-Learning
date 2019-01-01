@@ -19,7 +19,8 @@ class Player:
         
         # keep a list of places you need to check for changes to valid moves - game manager will append to this
         self.update_new_corner_adjs = []
-        self.update_removals = []
+        self.update_adjacents_to_last_played = []
+        self.board_before_previous_play = copy.deepcopy(board)
         
         # maintain a list of valid moves
         self.valid_moves = self.init_valid_moves(board,pieces)
@@ -58,11 +59,13 @@ class Player:
                     if board.check_valid_move(self.num,temp):
                         all_valid_moves.append((self.num,i,j,(x,y)))
         return all_valid_moves
+                   
         
+    # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
+    # a move will be stored as (player,piece_num,orientation,translation)
+    def make_move(self,board,pieces,strategy):
+        #Step 1 - update valid_moves list
         
-    # update_valid_moves
-    def update_valid_moves(self,board,pieces):
-                
         # for item in new corner adjs: search all unplayed piece orientations and add
          # each i represents 1 piece
         for i in range (0,len(pieces)):
@@ -86,29 +89,43 @@ class Player:
                             temp.translate((x,y))
                             if board.check_valid_move(self.num,temp):
                                 self.valid_moves.append((self.num,i,j,(x,y)))              
+
+        # get list of changed squares
+        # check for played piece, check for newly occupied square, and check for adjacents
+        check = board.board-self.board_before_previous_play.board
+        bad_squares = []
+        # all squares that have changed since last turn are no longer playable
+        for i in range(0,board.size):
+            for j in range(0,board.size):
+                if check[i,j] != 0:
+                    bad_squares.append((i,j))
+        # add adjacents from last move to bad_squares list
+        for point in self.update_adjacents_to_last_played:
+            bad_squares.append(point)
+                    
+        for move in self.valid_moves:
+            #check if piece has already been played
+            if self.played[move[1]] == 1:
+                self.valid_moves.remove(move)
+            else:
+                temp_piece = pieces[move[1]][move[2]][0]
+                # check if any piece squares are now occupied
+                for point in bad_squares:
+                    if point in temp_piece.occupied:
+                        self.valid_moves.remove(move)
+                        break
         
-#        # for item in removed_squares: search all valid_moves for moves that occupy this square and remove
-#        for move in self.valid_moves:
-#            temp_piece = pieces[move[1]][move[2]][0]
-#            for point in temp_piece.occupied:
-#                if point in self.update_removals:
-#                    self.valid_moves.remove(move)
-#                    break
-        for move in self.valid_moves:                        
-            temp_piece = pieces[move[1]][move[2]][0]
-            for point in temp_piece.occupied:
-                if board.board[point[0],point[1]] != 0:
-                    self.valid_moves.remove(move)
-                    break
+        #Step 2 - select a move from valid moves
+        if len(self.valid_moves) == 0:
+            return False
+        else:
+            if strategy == 'random':
+                move_idx = random.randint(0,len(self.valid_moves)-1)
+                move = self.valid_moves[move_idx]
+            else:
+                return 'That strategy doesnt exist yet.'
         
-        #reset update lists
-        self.update_new_corner_adjs = []
-        self.update_removals = []
-        
-    
-    # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
-    # a move will be stored as (player,piece_num,orientation,translation)
-    def make_move(self,move,board,pieces):
+        #Step 3 - make move
         # call make_move on board
         temp = copy.deepcopy(pieces[move[1]][move[2]][0])
         temp.translate(move[3])
@@ -122,35 +139,16 @@ class Player:
             if item[1] == move[1]:
                 self.valid_moves.remove(item)
                 
+        #reset update lists
+        self.update_new_corner_adjs = []
+        self.update_adjacents_to_last_played = []  
+        
         # add new corner_adjs to update_list
         for point in temp.diag_adjacents:
             self.update_new_corner_adjs.append(point)
             
-        # add occupieds and adjacents to update_list
-        update_occupieds = []
-        for point in temp.occupied:
-            self.update_removals.append(point)
-            update_occupieds.append(point)
+        # add adjacents to update list    
         for point in temp.adjacents:
-            self.update_removals.append(point)
+            self.update_adjacents_to_last_played.append(point)
         
-        # returns all squares occupied this turn to be added to other players update_removals lists
-        return update_occupieds
-        
-    
-    # update list of valid moves, then select a move from the list (randomly for now)
-    # return as move
-    # a move will be stored as (player,piece_num,orientation,translation)
-    def select_move(self,board,pieces,strategy):
-        
-        #update list of valid moves
-        self.update_valid_moves(board,pieces)
-        
-        if len(self.valid_moves) == 0:
-            return False
-        else:
-            if strategy == 'random':
-                move_idx = random.randint(0,len(self.valid_moves)-1)
-                return self.valid_moves[move_idx]
-            else:
-                return 'That strategy doesnt exist yet.'
+        return temp

@@ -42,23 +42,14 @@ class Game():
             current_player = self.player_list[self.turn-1]
             
             # ask player for move, then ask player to make move
-            move = current_player.select_move(self.game_board,self.pieces, 'random')
+            move = current_player.make_move(self.game_board,self.pieces, 'random')
             
             # if no move could be made, increment counter by 1
             # else reset counter to 0
             if  move == False: #no move available
                 turns_since_last_move = turns_since_last_move + 1
             else:
-                # make move and save move made to self.board
-                update_squares = current_player.make_move(move,self.game_board,self.pieces)
-                
-                # append points in play to each player's update lists
-                for player in self.player_list:
-                    for item in update_squares:
-                        player.update_removals.append(item)
-                
                 turns_since_last_move = 0
-           
             
             # eventually, log each move
             

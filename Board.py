@@ -63,7 +63,7 @@ class Board:
 
     # display fancy
     def display2(self):
-        sns.heatmap(self.board,cmap = 'Pastel1', linewidths = 1, square = True,cbar = False)
+        sns.heatmap(self.board,cmap = 'Accent', linewidths = 1, square = True,cbar = False)
         
     # play_piece
     def play_piece(self,player,piece):
