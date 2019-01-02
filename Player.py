@@ -3,7 +3,7 @@ from Board import Board
 import numpy as np
 import copy
 import random
-from heuristics import space_heuristic
+from heuristics import space_heuristic,space_heuristic2
 
 # Player class - stores information necessary to make a valid move for a player
 # self.num - player number used by Game
@@ -192,6 +192,22 @@ class Player:
                         temp_piece.translate(move[3])
                         temp_board.play_piece(self.num,temp_piece)
                         val = space_heuristic(self.num, temp_board)
+                        if val > best_val:
+                            best_val = val
+                            best_idx = i
+                    
+                    move = self.valid_moves[best_idx]
+                    
+                elif strategy == 'space_heuristic2':
+                    best_val = 0
+                    best_idx = 0
+                    for i in range(0,len(self.valid_moves)):
+                        move = self.valid_moves[i]
+                        temp_board = copy.deepcopy(board)
+                        temp_piece = copy.deepcopy(pieces[move[1]][move[2]][0])
+                        temp_piece.translate(move[3])
+                        temp_board.play_piece(self.num,temp_piece)
+                        val = space_heuristic2(self.num, temp_board)
                         if val > best_val:
                             best_val = val
                             best_idx = i

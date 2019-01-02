@@ -51,8 +51,8 @@ class Game():
                 #self.game_board.display2()
                 print(self.player_list[0].played)
                 print(self.player_list[1].played)
-                print(self.player_list[2].played)
-                print(self.player_list[3].played)
+                #print(self.player_list[2].played)
+                #print(self.player_list[3].played)
                 print("\n\n")
                 self.game_board.display2()
             
@@ -62,6 +62,8 @@ class Game():
             # ask player to make move (this function updates player and self.board)
             if self.turn == 1:
                 move = current_player.make_move(self.game_board,self.pieces, 'space_heuristic')
+            elif self.turn == 2:
+                move = current_player.make_move(self.game_board,self.pieces, 'space_heuristic2')
             else:
                 move = current_player.make_move(self.game_board,self.pieces, 'random')
             
@@ -96,5 +98,5 @@ class Game():
 random.seed(0)
 #import os
 #os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
-game = Game(5,4,20)
+game = Game(5,2,14)
 final_score = game.run()
