@@ -7,9 +7,10 @@ import time
 # player_num - int 
 # board - Board object (pass a copy of the board)
 # NOTE - probably favors player in bottom right due to sequential coloring
-def space_heuristic(player_num,board_obj,verbose = True):
+def space_heuristic(player_num,board_obj,verbose = False):
 
     board = board_obj.board
+    controlled_by_player_init = sum(sum(board == player_num))
     #loops as long as squares are changing color still
     changes_made = True
     while changes_made:
@@ -51,9 +52,9 @@ def space_heuristic(player_num,board_obj,verbose = True):
             print(board)
             print("\n")
         
-    # return ratio of squares controlled by player
+    # return ratio of squares controlled by player plus added bonus for playing larger pieces
     controlled_by_player = sum(sum(board == player_num))
-    ret =  controlled_by_player / float(board_obj.size**2)
+    ret =  (controlled_by_player / float(board_obj.size**2)) + controlled_by_player_init/100.0
     return ret
 
 if False: #test block        

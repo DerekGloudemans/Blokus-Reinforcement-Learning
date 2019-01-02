@@ -60,7 +60,10 @@ class Game():
             current_player = self.player_list[self.turn-1]
             
             # ask player to make move (this function updates player and self.board)
-            move = current_player.make_move(self.game_board,self.pieces, 'random')
+            if self.turn == 1:
+                move = current_player.make_move(self.game_board,self.pieces, 'space_heuristic')
+            else:
+                move = current_player.make_move(self.game_board,self.pieces, 'random')
             
             # if no move could be made, increment counter by 1
             # else reset counter to 0
