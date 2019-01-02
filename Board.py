@@ -1,19 +1,24 @@
 from Piece import Piece
 import numpy as np
-import copy
 import matplotlib.pyplot as plt
-import math
 import seaborn as sns
 
-# Board class has board and size
-# views moves as a Piece object (already translated) and a player (integer from 1 to 4)
+# Board - maintains representation of game board
+# self.board- a numpy array representation of the board, with a 0 representing
+    # an unclaimed square and an integer representing a square claimed by that player
+# self.size represents board dimensions
 
 class Board:
+    # Constructor
+    # size - int representing length and width of board
     def __init__(self,size):
         self.board = np.zeros([size,size])
         self.size = size
 
-# moves are expressed as a translated (player,piece_num,orientation,translation (x,y))
+    #check_valid_move() - returns True if move is valid for current board state, False otherwise
+    # player - int from 1 to number of players
+    # piece - translated Piece object
+    # verbose - if True, outputs reason why move is not valid
     def check_valid_move(self, player,test_piece,verbose = False):                
        
         #verify each corner falls within bounds
@@ -57,17 +62,19 @@ class Board:
         
         return True
        
-    # display board
+    # display() - display board as numpy array
     def display(self):
         print(self.board)
 
-    # display fancy
+    # display2() - displays a slightly nicer representation of board
     def display2(self):
         plt.figure()
         sns.heatmap(self.board,cmap = 'Accent', linewidths = 1, square = True,cbar = False)
         plt.show()
         
-    # play_piece
+    # play_piece() - update board with player's piece if valid
+    # player - int from 1 to number of players
+    # piece - translated Piece object
     def play_piece(self,player,piece):
         if self.check_valid_move(player,piece,verbose = True):
             for point in piece.occupied:

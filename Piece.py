@@ -1,10 +1,16 @@
 import numpy as np
 import copy
 
-# Implement piece as a list of coordinates
+# Piece class - represents one piece as lists of (x,y) tuples
+# self.corners
+# self.occupied
+# self.adjacents
+# self.corner_adjacents
 class Piece:
     
     # Constructor
+    # size_in - int representing max number of squares per piece (5)
+    # p_array - numpy array of size size_in * size_in with 1s on squares occupied by piece, 0s otherwise
     def __init__(self, size_in, p_array):
         self.size = size_in
         
@@ -18,9 +24,9 @@ class Piece:
         self.adjacents = self.get_adjacents()
         self.diag_adjacents = self.get_diag_adjacents()
     
-    #### Utilpieceity functions for translating piece
+    ### Utility functions for transforming piece
     
-    #flips piece along major diagonal    
+    # flip() - flips piece along major diagonal (by reference)
     def flip(self):   
          self.occupied[:] = [(-point[1],-point[0]) for point in self.occupied]
          self.corners[:] = [(-point[1],-point[0]) for point in self.corners]
@@ -29,7 +35,8 @@ class Piece:
          self.shift_min()
          return self
     
-     # rotates piece by 90 degrees times input
+     # rotate() - rotates piece by 90 degrees times input (by reference)
+     # quarter_rotations - positive int (generally 0-3)
     def rotate(self,quarter_rotations = 1):
         if quarter_rotations % 4 == 0:
             x = 0
@@ -59,8 +66,9 @@ class Piece:
         self.shift_min()
         return self
     
-    # shift is a 2D tuple
-    # warning - not protected against index overflow
+    # translate() - shifts piece by amount specified (by reference)
+    # shift - 2D tuple of ints (x_shift,y_shift)
+    # warning - not protected against index overflow, so don't call piece.show() afterwards
     def translate(self, shift):
         self.occupied[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.occupied]
         self.corners[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.corners]
@@ -68,6 +76,7 @@ class Piece:
         self.diag_adjacents[:] = [(point[0]+shift[0],point[1]+shift[1]) for point in self.diag_adjacents]
         return self
     
+    # shift_min() - shifts a piece so that it's minimum x and y coordinates are 0
     def shift_min(self):
         #find min coordinates
         min_x = 0
@@ -87,7 +96,8 @@ class Piece:
     
     #### Utility functions for getting specific points (used by constructor)    
     
-    # returns a list of 2D tuples for adjacent spaces
+    # get_adjacents() - returns a list of 2D tuples for adjacent spaces 
+    # used by constructor
     def get_adjacents(self):
         #store all 1-block translations
         aug_list = []
@@ -104,7 +114,8 @@ class Piece:
       
         return final_list
     
-    #returns a list of 2D tuples for diagonal adjacent squares                  
+    # get_diag_adjacents() - returns a list of 2D tuples for diagonal adjacent squares 
+    # used by constuctor                 
     def get_diag_adjacents(self):
         #store all 1-block diagonal translations
         aug_list = []
@@ -121,7 +132,7 @@ class Piece:
       
         return final_list
     
-    #returns a list of 2D tuples for corner squares 
+    # get_corners() - returns a list of 2D tuples for corner squares 
     def get_corners(self):
         final_list = []
         for point in self.occupied:
@@ -132,7 +143,8 @@ class Piece:
     
     #### Utility functions for checking piece equality or similarity
     
-    # checks for translational, rotational and flip symmetry 
+    # is_same() checks for translational, rotational and flip symmetry
+    # other_piece - Piece object (not permanently altered)
     def is_same(self, other_piece):
         for i in range (0,4):
             if self.is_translation(other_piece.rotate(i)):
@@ -154,7 +166,8 @@ class Piece:
                 other_piece.rotate(-i)
         return False
    
-    # checks for translational symmetry to another piece
+    # is_translation() - checks for translational symmetry to another piece (not altered)
+    # other_piece -  Piece object
     def is_translation(self,other_piece):
         a = self.piece_array()
         for i in range(0,len(a)):
@@ -165,18 +178,18 @@ class Piece:
     
     #### Other utility functions
     
-    #creates a numpy array representation of piece
+    # piece_array() - creates a numpy array representation of piece
     def piece_array(self):
         out = np.zeros([self.size,self.size])
         for point in self.occupied:
             out[point[0],point[1]] = 1
         return out    
     
-    # prints numpy representation of piece
+    # show() - prints numpy representation of piece
     def show(self):
         print(self.piece_array())
         
-    # returns a list of all unique orientations of the piece
+    # get_orientations() - returns a list of all unique orientations of the piece
     def get_orientations(self):
         #create list of all possible orientations
         orientations = []

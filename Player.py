@@ -1,15 +1,27 @@
 from Piece import Piece
 from Board import Board
-import pickle
 import numpy as np
 import copy
 import random
 
-# a move will be stored as (player,piece_num,orientation,translation)
 
+# Player class - stores information necessary to make a valid move for a player
+# self.num - player number used by Game
+# self.played - 1D np array with 1 if piece at that index in Game.pieces is played, 0 otherwise
+# self.update_new_corner_adjs - list of 2D (x,y) integer tuples 
+    # where corner_adjacents are added when a move is made
+# self.update_adjacents_to_last_played - list of @d (x,y) integer tuples 
+    # where adjacent squares to a played piece are stored
+# self.board_before_previous_play - Board object used to determine changed squares
+# self.valid_moves - list of valid moves, where moves are a tuple
+    # a move will be stored as (player_num,piece_num,orientation,translation)
 class Player:
     
-    #initialize
+    # Constructor
+    # player_num - integer, assigned by Game object
+    # size_in - max piece size (5)
+    # board - Board object (generally an empty board)
+    # pieces - list of lists of Piece objects , as specified in Game.pieces
     def __init__(self,player_num,size_in,board,pieces):
     
         self.num = player_num
@@ -25,15 +37,21 @@ class Player:
         self.board_before_previous_play = copy.deepcopy(board)
         
         # maintain a list of valid moves
+        self.valid_moves = []
         self.init_valid_moves(board,pieces)
-        
-    # initialize valid move list
+   
+    
+    # init_valid_moves() - initializes valid_moves list for first turn
+    # board - Board object
+    # pieces - list of lists of Piece objects
+    
     # Note from Mike: Not top priority, but I wonder if some of the code
     # from this function could be easily combined with the update_valid_moves
     # function to avoid duplication?                                                                            
     def init_valid_moves(self,board,pieces):
         all_valid_moves = []
         
+        # selects one valid corner for each player, so each plays in a different corner
         if self.num == 1:
             corner = (0,0)
         elif self.num == 2:
@@ -70,13 +88,18 @@ class Player:
         self.valid_moves =  all_valid_moves
                                    
         
-    # make_move - updates all players' lists of tracked changes, updates available piecelist, returns move to Game, which will call board method to update board
-    # a move will be stored as (player,piece_num,orientation,translation)
+    # make_move() -  updates valid_moves, selects a move using specified strategy
+        # makes move on input Board object, and returns move
+    # board - Board object
+    # pieces - list of lists of Piece objects
+    # strategy - string keyword ('random')
+    # returns move - stored as (player,piece_num,orientation,translation)
     def make_move(self,board,pieces,strategy):
         #Step 1 - update valid_moves list
         
-        # for item in new corner adjs: search all unplayed piece orientations and add
-         # each i represents 1 piece
+        # for item in new corner adjacencies (resulting from last played piece)
+        # search all unplayed piece orientations onto new corner adjacency
+        # each i represents 1 piece
         for i in range (0,len(pieces)):
             if self.played[i] == 0:
                 #each j represents 1 orientation
@@ -93,70 +116,84 @@ class Player:
                             x = item[0] - pieces[i][j][0].corners[k][0]
                             y = item[1] - pieces[i][j][0].corners[k][1]
                             
-                            #check if move is valid
+                            #check if move is valid, if so append to valid_moves
+                            # temp is a copy of Piece object stored in Game.pieces
                             temp = copy.deepcopy(pieces[i][j][0])
                             temp.translate((x,y))
                             if board.check_valid_move(self.num,temp):
                                 self.valid_moves.append((self.num,i,j,(x,y)))         
 
         
-
-        # get list of changed squares
-        # check for played piece, check for newly occupied square, and check for adjacents
+        
+        # get list of changed squares since before last move
         check = board.board-self.board_before_previous_play.board
+        # all squares that have changed since last turn are no longer usable
         bad_squares = []
-        # all squares that have changed since last turn are no longer playable
         for i in range(0,board.size):
             for j in range(0,board.size):
                 if check[i,j] != 0:
                     bad_squares.append((i,j))
                     
-        # add adjacents from last move to bad_squares list
+        # squares adjacent to player's last piece played are no longer usable
         for point in self.update_adjacents_to_last_played:
             bad_squares.append(point)
             
-        # check if any piece squares are now occupied or are
-        # adjacent to player's own pieces
+        # for each move, check if any unusable squares are occupied, and remove if so
+        # note list is checked in reverse order so that removing a move does not
+        # alter list indexing
         for move_index in reversed(range((len(self.valid_moves)))):
             move = self.valid_moves[move_index]
             temp_piece = copy.deepcopy(pieces[move[1]][move[2]][0])
             temp_piece.translate(move[3])
             
             for point in bad_squares:
-                
                 if point in temp_piece.occupied:
                     del self.valid_moves[move_index]
                     break
-                
-                
-        for i in range (0,len(self.played)):
-            if self.played[i] == 1:
-                for move_index in reversed(range((len(self.valid_moves)))):
-                    move = self.valid_moves[move_index]
-                    if move[1] == i:
-                        del self.valid_moves[move_index]
+        
+        ## NOTE: I replaced this block with the following block, but left it in case
+        ## it caused an error        
+#        # remove all moves for pieces already played
+#        for i in range (0,len(self.played)):
+#            if self.played[i] == 1:
+#                for move_index in reversed(range((len(self.valid_moves)))):
+#                    move = self.valid_moves[move_index]
+#                    if move[1] == i:
+#                        del self.valid_moves[move_index]
+        
+        # remove all moves for pieces already played
+        for move_index in reversed(range((len(self.valid_moves)))):
+            move = self.valid_moves[move_index]
+            if self.played[move[1]] == 1:
+                del self.valid_moves[move_index]
                         
+         
+        #Step 2 - select a move from valid moves    
+        # loop while a valid move has not been selected
+        # theoretically, this loop should never execute more than once since
+        # all moves in valid_moves should be valid
         success = False
         while success == False:
-            #Step 2 - select a move from valid moves
+            
             if len(self.valid_moves) == 0:
                 return False
             else:
                 if strategy == 'random':
+                    # get random index of valid move
                     move_idx = random.randint(0,len(self.valid_moves)-1)
                     move = self.valid_moves[move_idx]
                 else:
                     return 'That strategy doesnt exist yet.'
             
             #Step 3 - make move
-            # call make_move on board
+            # call play_piece on Board object
             temp = copy.deepcopy(pieces[move[1]][move[2]][0])
             temp.translate(move[3])
             success = board.play_piece(self.num,temp)
+            
             if success == False:
                 self.valid_moves.remove(move)
                 print("Attempted to play a failed move")
-                board.display2()
                 
         # update played_pieces
         self.played[move[1]] = 1
@@ -173,4 +210,4 @@ class Player:
         for point in temp.adjacents:
             self.update_adjacents_to_last_played.append(point)
         
-        return temp
+        return move
