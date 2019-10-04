@@ -14,7 +14,6 @@ class Board:
     def __init__(self,size):
         self.board = np.zeros([size,size])
         self.size = size
-
     #check_valid_move() - returns True if move is valid for current board state, False otherwise
     # player - int from 1 to number of players
     # piece - translated Piece object
