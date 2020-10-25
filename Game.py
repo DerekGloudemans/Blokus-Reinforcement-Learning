@@ -95,7 +95,7 @@ class Game():
 
 
 # start of body text, used to verify code was working        
-random.seed(0)
+random.seed(3)
 #import os
 #os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
 game = Game(5,4,20)

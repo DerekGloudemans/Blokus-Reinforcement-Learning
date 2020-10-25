@@ -206,6 +206,7 @@ class Piece:
             for item2 in unique_orientations:
                 if item[0].is_translation(item2[0]):
                     unique = False
+                    break
             if unique:
                 unique_orientations.append(item)
         

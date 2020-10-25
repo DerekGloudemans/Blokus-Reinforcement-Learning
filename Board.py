@@ -67,9 +67,10 @@ class Board:
 
     # display2() - displays a slightly nicer representation of board
     def display2(self):
-        plt.figure()
+        #plt.figure()
         sns.heatmap(self.board,cmap = 'Accent', linewidths = 1, square = True,cbar = False)
         plt.show()
+        plt.pause(0.01)
         
     # play_piece() - update board with player's piece if valid
     # player - int from 1 to number of players

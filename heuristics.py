@@ -107,7 +107,7 @@ def space_heuristic2(player_num,board_obj,verbose = False):
     ret =  (controlled_by_player / float(board_obj.size**2)) + controlled_by_player_init/100.0
     return ret
 
-if False: #test block        
+if True: #test block        
     testBoard = Board(20)
     testBoard.board[10,10] = 1  
     testBoard.board[15,15] = 2  

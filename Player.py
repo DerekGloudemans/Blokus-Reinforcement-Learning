@@ -2,6 +2,7 @@ from Piece import Piece
 from Board import Board
 import numpy as np
 import copy
+import time
 import random
 from heuristics import space_heuristic,space_heuristic2
 
@@ -96,7 +97,7 @@ class Player:
     # returns move - stored as (player,piece_num,orientation,translation)
     def make_move(self,board,pieces,strategy):
         #Step 1 - update valid_moves list
-        
+        start = time.time()
         # for item in new corner adjacencies (resulting from last played piece)
         # search all unplayed piece orientations onto new corner adjacency
         # each i represents 1 piece
@@ -242,4 +243,6 @@ class Player:
         for point in temp.adjacents:
             self.update_adjacents_to_last_played.append(point)
         
+        end = time.time()
+        print("Took player {} {} seconds to make move.".format(self.num,end-start))
         return move
