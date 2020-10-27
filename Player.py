@@ -95,9 +95,8 @@ class Player:
     # pieces - list of lists of Piece objects
     # strategy - string keyword ('random')
     # returns move - stored as (player,piece_num,orientation,translation)
-    def make_move(self,board,pieces,strategy):
-        #Step 1 - update valid_moves list
-        start = time.time()
+        
+    def update_valid_moves(self,board,pieces):
         # for item in new corner adjacencies (resulting from last played piece)
         # search all unplayed piece orientations onto new corner adjacency
         # each i represents 1 piece
@@ -167,12 +166,20 @@ class Player:
             move = self.valid_moves[move_index]
             if self.played[move[1]] == 1:
                 del self.valid_moves[move_index]
+                
+                
+    def make_move(self,board,pieces,strategy,return_all = False,input_move = None):
+        #Step 1 - update valid_moves list
+        start = time.time()
+        self.update_valid_moves(board,pieces)
                         
          
         #Step 2 - select a move from valid moves    
         # loop while a valid move has not been selected
         # theoretically, this loop should never execute more than once since
         # all moves in valid_moves should be valid
+        if return_all:
+            return self.valid_moves
         success = False
         while success == False:
             
@@ -214,7 +221,9 @@ class Player:
                             best_idx = i
                     
                     move = self.valid_moves[best_idx]
-                    
+              
+                elif strategy == "manual":
+                    move = input_move
                 else:
                     return 'That strategy doesnt exist yet.'
             
@@ -244,5 +253,5 @@ class Player:
             self.update_adjacents_to_last_played.append(point)
         
         end = time.time()
-        print("Took player {} {} seconds to make move.".format(self.num,end-start))
+        #print("Took player {} {} seconds to make move.".format(self.num,end-start))
         return move

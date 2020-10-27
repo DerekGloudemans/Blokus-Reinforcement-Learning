@@ -4,6 +4,7 @@ from Player import Player
 import numpy as np
 import pickle
 import random
+import copy
 
 # Game class- manages players, turns, and board
 # self.game_board - Board object representing current game state
@@ -93,10 +94,43 @@ class Game():
             scores.append(sum(sum(self.game_board.board == i+1)))    
         return scores
 
+    def enumerate_current_moves(self):
+        """
+        Returns current player idx and all possible moves (as board states) for that player
+        """
+        # get all valid moves
+        player = self.player_list[self.turn-1]
+        moves = player.make_move(self.game_board,self.pieces,"random",return_all = True)
+        
+        all_moves = []
+        
+        for move in moves:
+            temp_board = copy.deepcopy(self.game_board)
+            temp_piece = copy.deepcopy(self.pieces[move[1]][move[2]][0])
+            temp_piece.translate(move[3])
+            temp_board.play_piece(self.turn,temp_piece)            
+            all_moves.append(temp_board)
+            
+        return all_moves,moves
+     
+    def make_move(self,move):
+        """
+        Manually makes a move, updating played pieces for that player,turn, and board_state
+        """
+        turn = self.turn
+        player = self.player_list[turn-1]
+        move_return = player.make_move(self.game_board,self.pieces, 'manual',input_move = move)
+        
+        if move_return == False:
+            print ("error")
+        
+        # change to next player
+        self.turn = self.turn % len(self.player_list) + 1
 
-# start of body text, used to verify code was working        
-random.seed(3)
-#import os
-#os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
-game = Game(5,4,20)
-final_score = game.run()
+if __name__ == "__main__":
+    # start of body text, used to verify code was working        
+    random.seed(3)
+    #import os
+    #os.chdir("C:/Users/Mike/Documents/Coding Projects/Blokus/Dereks/Blokus-Reinforcement-Learning")
+    game = Game(5,4,20)
+    final_score = game.run()
