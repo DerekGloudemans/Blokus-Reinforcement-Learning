@@ -1,7 +1,7 @@
 # Blokus-Reinforcement-Learning
 ![](readme_ims/34.png)
 
-This project aims to create an efficient implementation of the game Blokus for eventual use as a reinforcement learning task. So far, the logic of the game has been implemented, and a few basic heuristics have been implemented. An example of gameplay is shown below. Heuristic agents (blue and red) perform fairly comparably but handily defeat random agents (yellow and grey).
+This project aims to create an efficient implementation of the game Blokus for eventual use as a reinforcement learning task. So far, the logic of the game has been implemented, and a few basic heuristics have been implemented. An example of gameplay is shown below. Heuristic agents (blue and yellow) perform fairly comparably but handily defeat random agents (red and grey).
 
 ![](readme_ims/game_heuristic_vs_random.gif)
 
